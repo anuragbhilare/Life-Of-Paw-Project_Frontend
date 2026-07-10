@@ -88,7 +88,7 @@ const Auth = () => {
         const redirectTo = sessionStorage.getItem('redirectTo') || '/dashboard';
         sessionStorage.removeItem('redirectTo');
         navigate(redirectTo);
-        window.location.reload();
+        
       } catch (err) {
         clearAuthCredentials();
         console.error("Login failed:", err);
@@ -156,7 +156,7 @@ const Auth = () => {
         const redirectTo = sessionStorage.getItem('redirectTo') || '/dashboard';
         sessionStorage.removeItem('redirectTo');
         navigate(redirectTo);
-        window.location.reload();
+        
       } catch (err) {
         clearAuthCredentials();
         console.error("Registration failed:", err);
