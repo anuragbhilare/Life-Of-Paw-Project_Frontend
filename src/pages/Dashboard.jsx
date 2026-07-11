@@ -24,19 +24,15 @@ const Dashboard = () => {
   const [adminAnimalFilter, setAdminAnimalFilter] = useState('ALL');
   const [isAdminAnimalDropdownOpen, setIsAdminAnimalDropdownOpen] = useState(false);
   const [activeTreasurySection, setActiveTreasurySection] = useState(null);
-  const [masterStats, setMasterStats] = useState({
-    totalUsers: 0,
-    totalAnimals: 0,
-    totalOrganizations: 0,
-    successfulAdoption: 0,
-    pendingAdoptions: 0
-  });
+  const [masterStats, setMasterStats] = useState(null);
   const [loadingMasterStats, setLoadingMasterStats] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileEditForm, setProfileEditForm] = useState({ fullName: '', phone: '', password: '' });
   const [profileError, setProfileError] = useState('');
   const [profileSuccess, setProfileSuccess] = useState('');
-  const [activeUser, setActiveUser] = useState(null);
+  const [activeUser, setActiveUser] = useState(() => {
+    return JSON.parse(sessionStorage.getItem('user_session')) || JSON.parse(sessionStorage.getItem('activeUser')) || null;
+  });
   const [dashboardMode, setDashboardMode] = useState(() => {
     const session = JSON.parse(sessionStorage.getItem('user_session')) || JSON.parse(sessionStorage.getItem('activeUser'));
     return (session?.role === 'ngo_owner' || sessionStorage.getItem('userRole') === 'ADMIN') ? 'org' : 'user';
@@ -821,7 +817,7 @@ const Dashboard = () => {
     if (role?.toUpperCase() === 'ADMIN') {
       fetchMasterStats();
     }
-  }, [activeUser, viewMode]);
+  }, [viewMode]);
 
   const handleAddCompanionClick = () => {
     setEditingCompanionId(null);
@@ -1597,7 +1593,9 @@ const Dashboard = () => {
         }
       }
 
-      setActiveUser(session);
+      if (JSON.stringify(activeUser) !== JSON.stringify(session)) {
+        setActiveUser(session);
+      }
 
       if (adminRole === 'ADMIN') {
         setViewMode('admin');
@@ -1690,6 +1688,261 @@ const Dashboard = () => {
       console.error("Failed to send message to adopter:", err);
       alert(err.response?.data?.message || err.message || "Failed to send message.");
     }
+  };
+
+  const renderAdminOverview = () => {
+    if (loadingMasterStats && !masterStats) {
+      return (
+        <motion.div
+          key="admin-overview-loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col gap-6 text-left"
+        >
+          {/* Premium Visual Skeleton Area */}
+          <div className="bg-gradient-to-r from-white to-[#F8F5F0] border border-[#D8D2C4]/40 shadow-xl p-8 sm:p-10 rounded-[2.5rem] mb-6 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 animate-pulse">
+            <div className="flex flex-col text-left max-w-xl flex-grow gap-3">
+              <div className="h-4 w-36 bg-stone-200 rounded" />
+              <div className="h-8 w-64 bg-stone-200 rounded mt-2" />
+              <div className="h-3 w-96 bg-stone-150 rounded mt-1" />
+            </div>
+            <div className="hidden lg:block w-72 h-52 bg-stone-200 rounded-2xl" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {[...Array(5)].map((_, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[24px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(27,67,50,0.02)] h-44 animate-pulse"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-stone-200" />
+                <div className="h-8 w-16 bg-stone-200 mt-4 rounded" />
+                <div className="h-3 w-28 bg-stone-150 mt-3 rounded" />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.div
+        key="admin-overview"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col gap-6 text-left"
+      >
+        <div className="bg-gradient-to-r from-white to-[#F8F5F0] border border-[#D8D2C4]/40 shadow-xl p-8 sm:p-10 rounded-[2.5rem] mb-6 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="absolute top-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#D4A017] via-[#1B4332] to-[#D4A017]" />
+          <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[radial-gradient(#D4A017_2px,transparent_2px)] [background-size:24px_24px]" />
+          
+          <div className="flex flex-col text-left max-w-xl">
+            <span className="flex items-center gap-2 text-[10px] tracking-[0.3em] text-[#D4A017] uppercase font-extrabold mb-3.5 font-sans">
+              <Sparkles size={13} className="text-[#D4A017] animate-pulse" />
+              WELCOME BACK, ADMIN
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1B4332] font-extrabold tracking-tight mb-4 leading-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              Admin Control Center
+            </h2>
+            <p className="text-stone-550 text-xs sm:text-sm font-sans leading-relaxed font-semibold">
+              Monitor platform activity, organization approvals, adoption requests, and community engagement across Life of Paw.
+            </p>
+          </div>
+
+          <div className="hidden lg:block w-72 h-52 relative shrink-0">
+            <img 
+              src={petAdminDashboardImg} 
+              alt="Pet Admin Dashboard" 
+              className="w-full h-full object-contain rounded-2xl shadow-md border border-[#D8D2C4]/40" 
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {[
+            { label: 'Total Registered Patrons', value: Math.max(0, (masterStats?.totalUsers || 0) - 1), icon: <Users size={22} className="text-[#B58925]" />, iconBg: 'bg-[#B58925]/10', hoverBorder: "hover:border-[#B58925]/50 hover:shadow-[#B58925]/5" },
+            { label: 'Total Animals Managed', value: masterStats?.totalAnimals || 0, icon: <PawPrint size={22} className="text-[#8B5A2B]" />, iconBg: 'bg-[#8B5A2B]/10', hoverBorder: "hover:border-[#8B5A2B]/50 hover:shadow-[#8B5A2B]/5" },
+            { label: 'Partner Sanctuaries', value: masterStats?.totalOrganizations || 0, icon: <Building size={22} className="text-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
+            { label: 'Successful Adoptions', value: masterStats?.successfulAdoption || 0, icon: <Heart size={22} className="text-[#1B4332] fill-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
+            { label: 'Pending Applications', value: masterStats?.pendingAdoptions || 0, icon: <Calendar size={22} className="text-[#7b0016]" />, iconBg: 'bg-[#7b0016]/10', hoverBorder: "hover:border-[#7b0016]/50 hover:shadow-[#7b0016]/5" }
+          ].map((item, idx) => (
+            <div 
+              key={idx} 
+              className={`bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[24px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(27,67,50,0.02)] relative overflow-hidden transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_50px_rgba(27,67,50,0.08)] hover:border-[#D4A017]/40 ${item.hoverBorder} group cursor-pointer h-44`}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#D4A017]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className={`w-12 h-12 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 shadow-sm border border-stone-100/50`}>
+                {item.icon}
+              </div>
+              
+              <span 
+                className="font-serif text-4xl sm:text-5xl font-extrabold text-[#1B4332] mt-4 block leading-none transition-colors duration-300 group-hover:text-[#7b0016]" 
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {item.value}
+              </span>
+              
+              <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-stone-400 font-sans mt-3 block leading-tight text-center">{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
+          <div className="lg:col-span-7 bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(27,67,50,0.03)] flex flex-col justify-between relative overflow-hidden">
+            <div>
+              <div className="flex justify-between items-center mb-6 border-b border-stone-100 pb-3">
+                <h3 className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] uppercase tracking-[0.15em] m-0" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Adoption Placements Overview</h3>
+                <div className="flex items-center gap-2 bg-[#1B4332]/5 border border-[#1B4332]/20 px-3 py-1.5 rounded-full">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D4A017] animate-pulse" />
+                  <span className="text-[9px] tracking-wider uppercase font-bold text-[#1B4332]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>This Month</span>
+                </div>
+              </div>
+              
+              <div className="relative w-full select-none mt-2">
+                <svg viewBox="0 0 500 210" className="w-full h-auto text-stone-400" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="chartAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#1B4332" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#1B4332" stopOpacity="0.00" />
+                    </linearGradient>
+                    <linearGradient id="chartLineGrad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#1B4332" />
+                      <stop offset="70%" stopColor="#1B4332" />
+                      <stop offset="100%" stopColor="#D4A017" />
+                    </linearGradient>
+                    <filter id="pointGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#D4A017" floodOpacity="0.4" />
+                    </filter>
+                    <filter id="tooltipShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#000000" floodOpacity="0.15" />
+                    </filter>
+                  </defs>
+
+                  {[
+                    { label: '50', y: 50 },
+                    { label: '40', y: 74 },
+                    { label: '30', y: 98 },
+                    { label: '20', y: 122 },
+                    { label: '10', y: 146 },
+                    { label: '0', y: 170 }
+                  ].map((grid, idx) => (
+                    <g key={idx} className="opacity-90">
+                      <line x1="40" y1={grid.y} x2="480" y2={grid.y} stroke="#F1EFEA" strokeWidth="1" strokeDasharray="4 4" />
+                      <text x="25" y={grid.y + 3} fill="#888888" fontSize="8.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="end">{grid.label}</text>
+                    </g>
+                  ))}
+
+                  <path 
+                    d="M 40 170 L 40 141.2 C 84 134, 84 126.8, 128 126.8 C 172 126.8, 172 134, 216 134 C 260 134, 260 117.2, 304 117.2 C 348 117.2, 348 98, 392 98 C 436 98, 436 69.2, 480 69.2 L 480 170 Z" 
+                    fill="url(#chartAreaGrad)" 
+                  />
+
+                  <path 
+                    d="M 40 141.2 C 84 134, 84 126.8, 128 126.8 C 172 126.8, 172 134, 216 134 C 260 134, 260 117.2, 304 117.2 C 348 117.2, 348 98, 392 98 C 436 98, 436 69.2, 480 69.2" 
+                    fill="none" 
+                    stroke="url(#chartLineGrad)" 
+                    strokeWidth="3.5" 
+                    strokeLinecap="round" 
+                  />
+
+                  {[
+                    { m: 'Jan', x: 40 },
+                    { m: 'Feb', x: 128 },
+                    { m: 'Mar', x: 216 },
+                    { m: 'Apr', x: 304 },
+                    { m: 'May', x: 392 },
+                    { m: 'Jun', x: 480 }
+                  ].map((axis, idx) => (
+                    <text key={idx} x={axis.x} y="192" fill="#888888" fontSize="9.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="middle">{axis.m}</text>
+                  ))}
+
+                  {[
+                    { m: 'Jan', val: 12, x: 40, y: 141.2 },
+                    { m: 'Feb', val: 18, x: 128, y: 126.8 },
+                    { m: 'Mar', val: 15, x: 216, y: 134 },
+                    { m: 'Apr', val: 22, x: 304, y: 117.2 },
+                    { m: 'May', val: 30, x: 392, y: 98.0 },
+                    { m: 'Jun', val: 42, x: 480, y: 69.2 },
+                    { m: 'July', val: 48, x: 560, y: 43.2 }
+                  ].map((pt, idx) => (
+                    <g key={idx} className="group/pt cursor-pointer">
+                      <circle cx={pt.x} cy={pt.y} r="18" fill="transparent" />
+                      
+                      <circle 
+                        cx={pt.x} 
+                        cy={pt.y} 
+                        r="6" 
+                        fill="#1B4332" 
+                        fillOpacity="0.15" 
+                        className="transition-all duration-300 group-hover/pt:scale-150 origin-center" 
+                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }} 
+                      />
+                      
+                      <circle 
+                        cx={pt.x} 
+                        cy={pt.y} 
+                        r="5" 
+                        fill="#FFFFFF" 
+                        stroke="#D4A017" 
+                        strokeWidth="2.5" 
+                        filter="url(#pointGlow)"
+                        className="transition-transform duration-300 group-hover/pt:scale-110 origin-center" 
+                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }} 
+                      />
+                      
+                      <circle cx={pt.x} cy={pt.y} r="2" fill="#1B4332" />
+
+                      <g 
+                        className="opacity-0 translate-y-2 group-hover/pt:opacity-100 group-hover/pt:translate-y-0 transition-all duration-300 pointer-events-none origin-bottom" 
+                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }}
+                      >
+                        <rect x={pt.x - 55} y={pt.y - 38} width="110" height="26" rx="8" fill="#1B4332" filter="url(#tooltipShadow)" />
+                        <rect x={pt.x - 55} y={pt.y - 38} width="110" height="26" rx="8" fill="none" stroke="#D4A017" strokeWidth="1" />
+                        
+                        <text x={pt.x} y={pt.y - 22} fill="#FFFFFF" fontSize="9.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="middle">
+                          {pt.val} Placements
+                        </text>
+                      </g>
+                    </g>
+                  ))}
+                </svg>
+              </div>
+            </div>
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-[9px] text-stone-400 font-bold uppercase tracking-widest" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Life of Paw Network</span>
+              <span className="text-[8px] text-[#1B4332] font-bold uppercase tracking-widest bg-[#1B4332]/5 border border-[#1B4332]/25 px-2.5 py-0.5 rounded-full">H1 Placement Report</span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(27,67,50,0.03)] flex flex-col justify-between min-h-[260px] text-left">
+            <div>
+              <h3 className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] uppercase tracking-[0.15em] border-b border-stone-100 pb-3 mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Recent Activities</h3>
+              
+              <div className="overflow-y-auto max-h-[190px] flex flex-col gap-4 pr-1">
+                {recentActivities.map((act, i) => (
+                  <div key={i} className="relative pl-6 pb-4 last:pb-0 group text-left">
+                    <div className="absolute left-[5px] top-2.5 bottom-0 w-[1px] bg-gradient-to-b from-[#D4A017] to-stone-100 group-last:hidden" />
+                    <div className="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full border border-[#D4A017] bg-[#F8F5F0] flex items-center justify-center shadow-sm transition-transform group-hover:scale-125 duration-300">
+                      <span className="w-1 h-1 rounded-full bg-[#1B4332]" />
+                    </div>
+                    <p className="font-sans text-stone-700 font-semibold text-xs leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{act}</p>
+                    <span className="text-[8px] tracking-wider uppercase font-bold text-stone-400 mt-1 block">Live platform event</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="pt-3 border-t border-stone-50/70 flex justify-between items-center">
+              <span className="text-[8px] text-stone-400 font-bold uppercase tracking-widest">Real-time log stream</span>
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
   };
 
   if (!activeUser) {
@@ -1885,260 +2138,8 @@ const Dashboard = () => {
               
               {viewMode === 'admin' ? (
                 <>
-                  {activeAdminTab === 'overview' && (() => {
-                    if (loadingMasterStats || !masterStats) {
-                      return (
-                        <motion.div
-                          key="admin-overview-loading"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex flex-col gap-6 text-left"
-                        >
-                          <div className="bg-gradient-to-r from-white to-[#F8F5F0] border border-[#D8D2C4]/40 shadow-xl p-8 sm:p-10 rounded-[2.5rem] mb-6 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 animate-pulse">
-                            <div className="flex flex-col text-left max-w-xl flex-grow gap-3">
-                              <div className="h-4 w-36 bg-stone-200 rounded" />
-                              <div className="h-8 w-64 bg-stone-200 rounded mt-2" />
-                              <div className="h-3 w-96 bg-stone-150 rounded mt-1" />
-                            </div>
-                            <div className="hidden lg:block w-72 h-52 bg-stone-200 rounded-2xl" />
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                            {[...Array(5)].map((_, idx) => (
-                              <div 
-                                key={idx} 
-                                className="bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[24px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(27,67,50,0.02)] h-44 animate-pulse"
-                              >
-                                <div className="w-12 h-12 rounded-2xl bg-stone-200" />
-                                <div className="h-8 w-16 bg-stone-200 mt-4 rounded" />
-                                <div className="h-3 w-28 bg-stone-150 mt-3 rounded" />
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      );
-                    }
-
-                    return (
-                      <motion.div
-                        key="admin-overview"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col gap-6 text-left"
-                      >
-                        <div className="bg-gradient-to-r from-white to-[#F8F5F0] border border-[#D8D2C4]/40 shadow-xl p-8 sm:p-10 rounded-[2.5rem] mb-6 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
-                          <div className="absolute top-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#D4A017] via-[#1B4332] to-[#D4A017]" />
-                          <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[radial-gradient(#D4A017_2px,transparent_2px)] [background-size:24px_24px]" />
-                          
-                          <div className="flex flex-col text-left max-w-xl">
-                            <span className="flex items-center gap-2 text-[10px] tracking-[0.3em] text-[#D4A017] uppercase font-extrabold mb-3.5 font-sans">
-                              <Sparkles size={13} className="text-[#D4A017] animate-pulse" />
-                              WELCOME BACK, ADMIN
-                            </span>
-                            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1B4332] font-extrabold tracking-tight mb-4 leading-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                              Admin Control Center
-                            </h2>
-                            <p className="text-stone-500 text-xs sm:text-sm font-sans leading-relaxed font-semibold">
-                              Monitor platform activity, organization approvals, adoption requests, and community engagement across Life of Paw.
-                            </p>
-                          </div>
-
-                          <div className="hidden lg:block w-72 h-52 relative shrink-0">
-                            <img 
-                              src={petAdminDashboardImg} 
-                              alt="Pet Admin Dashboard" 
-                              className="w-full h-full object-contain rounded-2xl shadow-md border border-[#D8D2C4]/40" 
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                          {[
-                            { label: 'Total Registered Patrons', value: Math.max(0, (masterStats?.totalUsers || 0) - 1), icon: <Users size={22} className="text-[#B58925]" />, iconBg: 'bg-[#B58925]/10', hoverBorder: "hover:border-[#B58925]/50 hover:shadow-[#B58925]/5" },
-                            { label: 'Total Animals Managed', value: masterStats?.totalAnimals || 0, icon: <PawPrint size={22} className="text-[#8B5A2B]" />, iconBg: 'bg-[#8B5A2B]/10', hoverBorder: "hover:border-[#8B5A2B]/50 hover:shadow-[#8B5A2B]/5" },
-                            { label: 'Partner Sanctuaries', value: masterStats?.totalOrganizations || 0, icon: <Building size={22} className="text-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
-                            { label: 'Successful Adoptions', value: masterStats?.successfulAdoption || 0, icon: <Heart size={22} className="text-[#1B4332] fill-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
-                            { label: 'Pending Applications', value: masterStats?.pendingAdoptions || 0, icon: <Calendar size={22} className="text-[#7b0016]" />, iconBg: 'bg-[#7b0016]/10', hoverBorder: "hover:border-[#7b0016]/50 hover:shadow-[#7b0016]/5" }
-                          ].map((item, idx) => (
-                            <div 
-                              key={idx} 
-                              className={`bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[24px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(27,67,50,0.02)] relative overflow-hidden transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_50px_rgba(27,67,50,0.08)] hover:border-[#D4A017]/40 ${item.hoverBorder} group cursor-pointer h-44`}
-                            >
-                              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#D4A017]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                              
-                              <div className={`w-12 h-12 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 shadow-sm border border-stone-100/50`}>
-                                {item.icon}
-                              </div>
-                              
-                              <span 
-                                className="font-serif text-4xl sm:text-5xl font-extrabold text-[#1B4332] mt-4 block leading-none transition-colors duration-300 group-hover:text-[#7b0016]" 
-                                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                              >
-                                {item.value}
-                              </span>
-                              
-                              <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-stone-400 font-sans mt-3 block leading-tight text-center">{item.label}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
-                          <div className="lg:col-span-7 bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(27,67,50,0.03)] flex flex-col justify-between relative overflow-hidden">
-                            <div>
-                              <div className="flex justify-between items-center mb-6 border-b border-stone-100 pb-3">
-                                <h3 className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] uppercase tracking-[0.15em] m-0" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Adoption Placements Overview</h3>
-                                <div className="flex items-center gap-2 bg-[#1B4332]/5 border border-[#1B4332]/20 px-3 py-1.5 rounded-full">
-                                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D4A017] animate-pulse" />
-                                  <span className="text-[9px] tracking-wider uppercase font-bold text-[#1B4332]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>This Month</span>
-                                </div>
-                              </div>
-                              
-                              <div className="relative w-full select-none mt-2">
-                                <svg viewBox="0 0 500 210" className="w-full h-auto text-stone-400" xmlns="http://www.w3.org/2000/svg">
-                                  <defs>
-                                    <linearGradient id="chartAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="0%" stopColor="#1B4332" stopOpacity="0.25" />
-                                      <stop offset="100%" stopColor="#1B4332" stopOpacity="0.00" />
-                                    </linearGradient>
-                                    <linearGradient id="chartLineGrad" x1="0" y1="0" x2="1" y2="0">
-                                      <stop offset="0%" stopColor="#1B4332" />
-                                      <stop offset="70%" stopColor="#1B4332" />
-                                      <stop offset="100%" stopColor="#D4A017" />
-                                    </linearGradient>
-                                    <filter id="pointGlow" x="-20%" y="-20%" width="140%" height="140%">
-                                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#D4A017" floodOpacity="0.4" />
-                                    </filter>
-                                    <filter id="tooltipShadow" x="-20%" y="-20%" width="140%" height="140%">
-                                      <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#000000" floodOpacity="0.15" />
-                                    </filter>
-                                  </defs>
-
-                                  {[
-                                    { label: '50', y: 50 },
-                                    { label: '40', y: 74 },
-                                    { label: '30', y: 98 },
-                                    { label: '20', y: 122 },
-                                    { label: '10', y: 146 },
-                                    { label: '0', y: 170 }
-                                  ].map((grid, idx) => (
-                                    <g key={idx} className="opacity-90">
-                                      <line x1="40" y1={grid.y} x2="480" y2={grid.y} stroke="#F1EFEA" strokeWidth="1" strokeDasharray="4 4" />
-                                      <text x="25" y={grid.y + 3} fill="#888888" fontSize="8.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="end">{grid.label}</text>
-                                    </g>
-                                  ))}
-
-                                  <path 
-                                    d="M 40 170 L 40 141.2 C 84 134, 84 126.8, 128 126.8 C 172 126.8, 172 134, 216 134 C 260 134, 260 117.2, 304 117.2 C 348 117.2, 348 98, 392 98 C 436 98, 436 69.2, 480 69.2 L 480 170 Z" 
-                                    fill="url(#chartAreaGrad)" 
-                                  />
-
-                                  <path 
-                                    d="M 40 141.2 C 84 134, 84 126.8, 128 126.8 C 172 126.8, 172 134, 216 134 C 260 134, 260 117.2, 304 117.2 C 348 117.2, 348 98, 392 98 C 436 98, 436 69.2, 480 69.2" 
-                                    fill="none" 
-                                    stroke="url(#chartLineGrad)" 
-                                    strokeWidth="3.5" 
-                                    strokeLinecap="round" 
-                                  />
-
-                                  {[
-                                    { m: 'Jan', x: 40 },
-                                    { m: 'Feb', x: 128 },
-                                    { m: 'Mar', x: 216 },
-                                    { m: 'Apr', x: 304 },
-                                    { m: 'May', x: 392 },
-                                    { m: 'Jun', x: 480 }
-                                  ].map((axis, idx) => (
-                                    <text key={idx} x={axis.x} y="192" fill="#888888" fontSize="9.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="middle">{axis.m}</text>
-                                  ))}
-
-                                  {[
-                                    { m: 'Jan', val: 12, x: 40, y: 141.2 },
-                                    { m: 'Feb', val: 18, x: 128, y: 126.8 },
-                                    { m: 'Mar', val: 15, x: 216, y: 134 },
-                                    { m: 'Apr', val: 22, x: 304, y: 117.2 },
-                                    { m: 'May', val: 30, x: 392, y: 98.0 },
-                                    { m: 'Jun', val: 42, x: 480, y: 69.2 },
-                                    { m: 'July', val: 48, x: 560, y: 43.2 }
-                                  ].map((pt, idx) => (
-                                    <g key={idx} className="group/pt cursor-pointer">
-                                      <circle cx={pt.x} cy={pt.y} r="18" fill="transparent" />
-                                      
-                                      <circle 
-                                        cx={pt.x} 
-                                        cy={pt.y} 
-                                        r="6" 
-                                        fill="#1B4332" 
-                                        fillOpacity="0.15" 
-                                        className="transition-all duration-300 group-hover/pt:scale-150 origin-center" 
-                                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }} 
-                                      />
-                                      
-                                      <circle 
-                                        cx={pt.x} 
-                                        cy={pt.y} 
-                                        r="5" 
-                                        fill="#FFFFFF" 
-                                        stroke="#D4A017" 
-                                        strokeWidth="2.5" 
-                                        filter="url(#pointGlow)"
-                                        className="transition-transform duration-300 group-hover/pt:scale-110 origin-center" 
-                                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }} 
-                                      />
-                                      
-                                      <circle cx={pt.x} cy={pt.y} r="2" fill="#1B4332" />
-
-                                      <g 
-                                        className="opacity-0 translate-y-2 group-hover/pt:opacity-100 group-hover/pt:translate-y-0 transition-all duration-300 pointer-events-none origin-bottom" 
-                                        style={{ transformOrigin: `${pt.x}px ${pt.y}px` }}
-                                      >
-                                        <rect x={pt.x - 55} y={pt.y - 38} width="110" height="26" rx="8" fill="#1B4332" filter="url(#tooltipShadow)" />
-                                        <rect x={pt.x - 55} y={pt.y - 38} width="110" height="26" rx="8" fill="none" stroke="#D4A017" strokeWidth="1" />
-                                        
-                                        <text x={pt.x} y={pt.y - 22} fill="#FFFFFF" fontSize="9.5" fontWeight="bold" fontFamily="'Plus Jakarta Sans', sans-serif" textAnchor="middle">
-                                          {pt.val} Placements
-                                        </text>
-                                      </g>
-                                    </g>
-                                  ))}
-                                </svg>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center mt-4">
-                              <span className="text-[9px] text-stone-400 font-bold uppercase tracking-widest" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Life of Paw Network</span>
-                              <span className="text-[8px] text-[#1B4332] font-bold uppercase tracking-widest bg-[#1B4332]/5 border border-[#1B4332]/25 px-2.5 py-0.5 rounded-full">H1 Placement Report</span>
-                            </div>
-                          </div>
-
-                          <div className="lg:col-span-5 bg-white border border-[#D8D2C4]/40 p-6 sm:p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(27,67,50,0.03)] flex flex-col justify-between min-h-[260px] text-left">
-                            <div>
-                              <h3 className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] uppercase tracking-[0.15em] border-b border-stone-100 pb-3 mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Recent Activities</h3>
-                              
-                              <div className="overflow-y-auto max-h-[190px] flex flex-col gap-4 pr-1">
-                                {recentActivities.map((act, i) => (
-                                  <div key={i} className="relative pl-6 pb-4 last:pb-0 group text-left">
-                                    <div className="absolute left-[5px] top-2.5 bottom-0 w-[1px] bg-gradient-to-b from-[#D4A017] to-stone-100 group-last:hidden" />
-                                    <div className="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full border border-[#D4A017] bg-[#F8F5F0] flex items-center justify-center shadow-sm transition-transform group-hover:scale-125 duration-300">
-                                      <span className="w-1 h-1 rounded-full bg-[#1B4332]" />
-                                    </div>
-                                    <p className="font-sans text-stone-700 font-semibold text-xs leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{act}</p>
-                                    <span className="text-[8px] tracking-wider uppercase font-bold text-stone-400 mt-1 block">Live platform event</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="pt-3 border-t border-stone-50/70 flex justify-between items-center">
-                              <span className="text-[8px] text-stone-400 font-bold uppercase tracking-widest">Real-time log stream</span>
-                              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })()}
-
+                  {activeAdminTab === 'overview' && renderAdminOverview()}
+                  
                   {activeAdminTab === 'users' && (() => {
                     const filteredUsers = [...users]
                       .filter(u => {
