@@ -24,6 +24,14 @@ const Dashboard = () => {
   const [adminAnimalFilter, setAdminAnimalFilter] = useState('ALL');
   const [isAdminAnimalDropdownOpen, setIsAdminAnimalDropdownOpen] = useState(false);
   const [activeTreasurySection, setActiveTreasurySection] = useState(null);
+  const [masterStats, setMasterStats] = useState({
+    totalUsers: 0,
+    totalAnimals: 0,
+    totalOrganizations: 0,
+    successfulAdoption: 0,
+    pendingAdoptions: 0
+  });
+  const [loadingMasterStats, setLoadingMasterStats] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileEditForm, setProfileEditForm] = useState({ fullName: '', phone: '', password: '' });
   const [profileError, setProfileError] = useState('');
@@ -794,6 +802,27 @@ const Dashboard = () => {
     };
   }, [activeTreasurySection]);
 
+  const fetchMasterStats = async () => {
+    try {
+      setLoadingMasterStats(true);
+      const response = await apiClient.get('/admin/dashboard/master-view');
+      if (response.data && response.data.stats) {
+        setMasterStats(response.data.stats);
+      }
+    } catch (err) {
+      console.error("Failed to fetch master stats:", err);
+    } finally {
+      setLoadingMasterStats(false);
+    }
+  };
+
+  useEffect(() => {
+    const role = activeUser?.role || sessionStorage.getItem('userRole');
+    if (role?.toUpperCase() === 'ADMIN') {
+      fetchMasterStats();
+    }
+  }, [activeUser, viewMode]);
+
   const handleAddCompanionClick = () => {
     setEditingCompanionId(null);
     setNewCompanion({
@@ -1051,7 +1080,7 @@ const Dashboard = () => {
             date: req.requestDate ? new Date(req.requestDate).toLocaleDateString() : 'May 29, 2026',
             requestDate: req.requestDate,
             reason: req.reason,
-            status: req.status === 'APPROVED' ? 'APPROVED BY SANCTUARY' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY SANCTUARY',
+            status: req.status === 'APPROVED' ? 'APPROVED BY ADMIN' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY ADMIN',
             location: req.deliveryLocation || 'Bandra, Mumbai',
             user: req.user
           }));
@@ -1389,11 +1418,12 @@ const Dashboard = () => {
           breed: req.animal?.breed || 'Mixed Breed',
           date: req.requestDate ? new Date(req.requestDate).toLocaleDateString() : 'May 29, 2026',
           reason: req.reason,
-          status: req.status === 'APPROVED' ? 'APPROVED BY SANCTUARY' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY SANCTUARY',
+          status: req.status === 'APPROVED' ? 'APPROVED BY ADMIN' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY ADMIN',
           location: req.deliveryLocation || 'Bandra, Mumbai',
           user: req.user
         }));
         setInboundRequests(adapted);
+        fetchMasterStats();
       }
     } catch (err) {
       console.error(err);
@@ -1435,11 +1465,12 @@ const Dashboard = () => {
           breed: req.animal?.breed || 'Mixed Breed',
           date: req.requestDate ? new Date(req.requestDate).toLocaleDateString() : 'May 29, 2026',
           reason: req.reason,
-          status: req.status === 'APPROVED' ? 'APPROVED BY SANCTUARY' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY SANCTUARY',
+          status: req.status === 'APPROVED' ? 'APPROVED BY ADMIN' : req.status === 'PENDING' ? 'PENDING REVIEW' : 'REJECTED BY ADMIN',
           location: req.deliveryLocation || 'Bandra, Mumbai',
           user: req.user
         }));
         setInboundRequests(adapted);
+        fetchMasterStats();
       }
     } catch (err) {
       console.error(err);
@@ -1891,11 +1922,11 @@ const Dashboard = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                         {[
-                          { label: 'Total Users', value: Math.max(22, users.length), icon: <Users size={22} className="text-[#B58925]" />, iconBg: 'bg-[#B58925]/10', hoverBorder: "hover:border-[#B58925]/50 hover:shadow-[#B58925]/5" },
-                          { label: 'Total Animals', value: Math.max(48, managedAnimals.length), icon: <PawPrint size={22} className="text-[#8B5A2B]" />, iconBg: 'bg-[#8B5A2B]/10', hoverBorder: "hover:border-[#8B5A2B]/50 hover:shadow-[#8B5A2B]/5" },
-                          { label: 'Total Organizations', value: Math.max(7, allianceOrgs.length), icon: <Building size={22} className="text-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
-                          { label: 'Successful Adoptions', value: 31, icon: <Heart size={22} className="text-[#1B4332] fill-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
-                          { label: 'Pending Adoptions', value: 9, icon: <Calendar size={22} className="text-[#7b0016]" />, iconBg: 'bg-[#7b0016]/10', hoverBorder: "hover:border-[#7b0016]/50 hover:shadow-[#7b0016]/5" }
+                          { label: 'Total Registered Patrons', value: masterStats.totalUsers - 1, icon: <Users size={22} className="text-[#B58925]" />, iconBg: 'bg-[#B58925]/10', hoverBorder: "hover:border-[#B58925]/50 hover:shadow-[#B58925]/5" },
+                          { label: 'Total Animals Managed', value: masterStats.totalAnimals, icon: <PawPrint size={22} className="text-[#8B5A2B]" />, iconBg: 'bg-[#8B5A2B]/10', hoverBorder: "hover:border-[#8B5A2B]/50 hover:shadow-[#8B5A2B]/5" },
+                          { label: 'Partner Sanctuaries', value: masterStats.totalOrganizations, icon: <Building size={22} className="text-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
+                          { label: 'Successful Adoptions', value: masterStats.successfulAdoption, icon: <Heart size={22} className="text-[#1B4332] fill-[#1B4332]" />, iconBg: 'bg-[#1B4332]/10', hoverBorder: "hover:border-[#1B4332]/50 hover:shadow-[#1B4332]/5" },
+                          { label: 'Pending Applications', value: masterStats.pendingAdoptions, icon: <Calendar size={22} className="text-[#7b0016]" />, iconBg: 'bg-[#7b0016]/10', hoverBorder: "hover:border-[#7b0016]/50 hover:shadow-[#7b0016]/5" }
                         ].map((item, idx) => (
                           <div 
                             key={idx} 
@@ -2834,27 +2865,13 @@ const Dashboard = () => {
                                 {req.status === 'PENDING REVIEW' && (
                                   <div className="flex gap-2.5 justify-end pt-3 border-t border-stone-200/50">
                                     <button
-                                      onClick={() => {
-                                        setInboundRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'REJECTED BY SANCTUARY' } : r));
-                                        setManagedAnimals(prev => prev.map(a => a.name === req.petName ? { ...a, status: 'AVAILABLE' } : a));
-                                        setRecentActivities(prev => [
-                                          `Adoption request for ${req.petName} by ${req.requester} rejected.`,
-                                          ...prev
-                                        ]);
-                                      }}
+                                      onClick={() => handleRejectRequest(req.id)}
                                       className="px-4 py-2 border border-[#7b0016] rounded-full text-[9px] uppercase font-bold tracking-widest text-[#7b0016] hover:bg-[#7b0016]/5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                                     >
                                     REJECT APPLICATION
                                     </button>
                                     <button
-                                      onClick={() => {
-                                        setInboundRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'APPROVED BY SANCTUARY' } : r));
-                                        setManagedAnimals(prev => prev.map(a => a.name === req.petName ? { ...a, status: 'ADOPTED' } : a));
-                                        setRecentActivities(prev => [
-                                          `Adoption request for ${req.petName} by ${req.requester} approved.`,
-                                          ...prev
-                                        ]);
-                                      }}
+                                      onClick={() => handleApproveRequest(req.id)}
                                       className="px-4 py-2 bg-[#1B4332] text-white border border-[#1B4332] rounded-full text-[9px] uppercase font-bold tracking-widest hover:bg-[#7b0016] transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-sm"
                                     >
                                     APPROVE APPLICATION
@@ -3674,7 +3691,7 @@ const Dashboard = () => {
                             
                             <span
                               className={`px-4 py-1.5 rounded-full text-[9px] font-sans tracking-widest font-extrabold uppercase text-center self-start sm:self-auto border ${
-                                dos.status === 'APPROVED BY SANCTUARY'
+                                dos.status === 'APPROVED BY SANCTUARY' || dos.status === 'APPROVED BY ADMIN'
                                   ? 'bg-[#1B4332]/10 border-[#1B4332] text-[#1B4332]'
                                   : 'bg-[#7b0016]/10 border-[#7b0016] text-[#7b0016]'
                               }`}
