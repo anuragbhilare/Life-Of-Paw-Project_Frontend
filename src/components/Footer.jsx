@@ -144,7 +144,7 @@ const Footer = () => {
             EVERY RESCUE DESERVES A SECOND CHANCE.
           </p>
 
-          <div className="flex items-center space-x-6 font-sans">
+          {/* <div className="flex items-center space-x-6 font-sans">
             <a href="#" className="hover:text-[#D4A017] transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-[#D4A017] transition-colors">Terms of Service</a>
             
@@ -155,7 +155,7 @@ const Footer = () => {
             >
               <ArrowUp size={14} />
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>
