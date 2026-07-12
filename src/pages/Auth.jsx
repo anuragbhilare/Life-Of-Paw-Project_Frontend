@@ -33,9 +33,12 @@ const Auth = () => {
 
   const handleSignInChange = (e) => {
     const { name, value } = e.target;
+
     setSignInData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: name === "email"
+        ? value.trim().toLowerCase()
+        : value
     }));
   };
 
