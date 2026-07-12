@@ -319,9 +319,9 @@ const Home = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 border-t border-[#D8D2C4]/50 pt-8">
                 {[
-                  { id: "stat-1", label: "Rescued Animals", value: 15420, suffix: "+" },
-                  { id: "stat-2", label: "Successful Adoptions", value: 12890, suffix: "+" },
-                  { id: "stat-3", label: "Verified NGOs", value: 340, suffix: "+" }
+                  { id: "stat-1", label: "Rescued Animals", value: 29, suffix: "+" },
+                  { id: "stat-2", label: "Successful Adoptions", value: 9, suffix: "+" },
+                  { id: "stat-3", label: "Verified NGOs", value: 10, suffix: "+" }
                 ].map((stat) => (
                   <div key={stat.id} className="flex flex-col">
                     <div className="font-serif text-4xl sm:text-5xl text-[#D4A017] font-bold tracking-tight mb-2">

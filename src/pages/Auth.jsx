@@ -377,7 +377,7 @@ const Auth = () => {
             >
               <ShieldCheck size={14} className="text-[#D4A017]" />
               SUBMIT
-            </button>
+            </button> 
           </form>
 
           <div className="text-center mt-6">
