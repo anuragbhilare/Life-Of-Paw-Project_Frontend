@@ -99,8 +99,8 @@ const Organizations = () => {
             rescuesCount: org.animals ? org.animals.length : 12,
             logo: '🐾',
             sanctuaryDescription: org.sanctuaryDescription || '',
-            orgDescription: org.sanctuaryDescription || org.orgDescription || 'A partner sanctuary dedicated to animal welfare.',
-            description: org.sanctuaryDescription || org.orgDescription || 'A partner sanctuary dedicated to animal welfare.',
+            orgDescription: org.sanctuaryDescription || org.orgDescription || 'A certified, medical-first sanctuary leveraging advanced veterinary practices and large-scale habitat preservation to set a new benchmark for animal welfare.',
+            description: org.sanctuaryDescription || org.orgDescription || 'A certified, medical-first sanctuary leveraging advanced veterinary practices and large-scale habitat preservation to set a new benchmark for animal welfare.',
             galleryImages: org.galleryImages || []
           };
         });
@@ -568,7 +568,7 @@ const Organizations = () => {
               <div className="bg-white rounded-3xl p-8 border border-[#D8D2C4]/40 shadow-sm mb-8">
                 <h3 className="font-serif text-xl font-bold text-[#1B4332] mb-3">Audited Mission Statement</h3>
                 <p className="text-stone-650 leading-relaxed font-sans text-sm italic">
-                  "{selectedOrg.sanctuaryDescription || selectedOrg.orgDescription || 'A partner sanctuary dedicated to animal welfare.'}"
+                  "{selectedOrg.sanctuaryDescription || selectedOrg.orgDescription || 'A certified, medical-first sanctuary leveraging advanced veterinary practices and large-scale habitat preservation to set a new benchmark for animal welfare.'}"
                 </p>
               </div>
 
