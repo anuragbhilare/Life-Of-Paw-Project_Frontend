@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://life-of-paw-project-backend.onrender.com/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9999';
+const BASE_URL = `${API_BASE_URL}/api`;
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,

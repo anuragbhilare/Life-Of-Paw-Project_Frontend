@@ -9,7 +9,7 @@ import EmergencyRescue from '../assets/EmergencyRescue.jpeg';
 import rehab from '../assets/Rehab.jpg';
 import adoption from '../assets/DignifiedAdoption.jpeg';
 import besthome from '../assets/besthome.jpg';
-import { apiClient } from '../services/api';
+import { apiClient, API_BASE_URL } from '../services/api';
 import logoImage from '../assets/LifeOfPawLogo-2.png';
 
 
@@ -69,9 +69,9 @@ const Home = () => {
   };
 
   const getAvatarUrl = (avatar) => {
-    if (!avatar) return null;
-    if (avatar.startsWith('http')) return avatar;
-    return `http://localhost:9999${avatar}`;
+     if (!avatar) return null;
+     if (avatar.startsWith('http')) return avatar;
+     return `${API_BASE_URL}${avatar}`;
   };
 
   const getPostMetaData = (msgId) => {
@@ -147,7 +147,7 @@ const Home = () => {
             let resolvedImage = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=600';
             if (animal.images && animal.images.length > 0) {
               const path = animal.images[0].imageUrl;
-              resolvedImage = path.startsWith('http') ? path : `http://localhost:9999${path}`;
+              resolvedImage = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
             }
 
             const orgName = animalToOrgMap[animal.animalId] || 'Sanctuary Alliance HQ';

@@ -4,7 +4,7 @@ import { Heart, Star, Sparkles, X, CheckCircle2, ShieldCheck, BriefcaseMedicalIc
 import { mockAnimals } from '../mocks/mockData';
 import ScrollAnimate from '../components/ScrollAnimate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiClient } from '../services/api';
+import { apiClient, API_BASE_URL } from '../services/api';
 
 const RescueAnimals = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -79,7 +79,7 @@ const RescueAnimals = () => {
             const imgObj = imagesList[0];
             const path = imgObj.imageUrl || imgObj.IMAGE_URL || imgObj.image || imgObj.IMAGE;
             if (path) {
-              resolvedImage = path.startsWith('http') ? path : `http://localhost:9999${path}`;
+              resolvedImage = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
             }
           }
 

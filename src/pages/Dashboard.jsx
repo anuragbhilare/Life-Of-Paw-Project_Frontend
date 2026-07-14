@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import petAdminDashboardImg from '../assets/Pet_Admin_Dashboard.jpeg';
-import { apiCall, apiClient, clearAuthCredentials, setAuthCredentials } from '../services/api';
+import { apiCall, apiClient, clearAuthCredentials, setAuthCredentials, API_BASE_URL } from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -500,7 +500,7 @@ const Dashboard = () => {
           description: savedDesc || org.sanctuaryDescription || 'We offer open-canopy rehabilitation habitats, fully vaccinated onboarding protocols, 24/7 clinical veterinary coverage, and a dedicated post-adoption counseling program.',
           orgImages: savedImages || (org.galleryImages || []).map(img => ({
             name: img.imageUrl ? img.imageUrl.split('/').pop() : 'image',
-            url: `http://localhost:9999${img.imageUrl}`
+            url: `${API_BASE_URL}${img.imageUrl}`
           })),
           animals: org.animals || []
         };
@@ -556,7 +556,7 @@ const Dashboard = () => {
         galleryImages: org.galleryImages || [],
         orgImages: (org.galleryImages || []).map(img => ({
           name: img.imageUrl ? img.imageUrl.split('/').pop() : 'image',
-          url: `http://localhost:9999${img.imageUrl}`
+          url: `${API_BASE_URL}${img.imageUrl}`
         }))
       }));
       setPendingOrgs(adaptedPending);
@@ -706,9 +706,9 @@ const Dashboard = () => {
     }
     try {
       const [summaryRes, payoutsRes, donationsRes] = await Promise.all([
-        apiClient.get('http://localhost:9999/api/finance/admin/savings-summary'),
-        apiClient.get('http://localhost:9999/api/finance/admin/all-payouts'),
-        apiClient.get('http://localhost:9999/api/finance/admin/all-donations')
+        apiClient.get('/finance/admin/savings-summary'),
+        apiClient.get('/finance/admin/all-payouts'),
+        apiClient.get('/finance/admin/all-donations')
       ]);
       setSummary(summaryRes.data);
       setPayouts(payoutsRes.data);
@@ -2371,7 +2371,7 @@ const Dashboard = () => {
                                         <div className="flex items-center gap-3">
                                           {databaseImage ? (
                                             <img 
-                                              src={databaseImage.startsWith('http') ? databaseImage : `http://localhost:9999${databaseImage}`}
+                                              src={databaseImage.startsWith('http') ? databaseImage : `${API_BASE_URL}${databaseImage}`}
                                               alt={animal.name}
                                               className="w-8 h-8 rounded-full object-cover border border-stone-200"
                                             />
@@ -2740,7 +2740,7 @@ const Dashboard = () => {
                                         {org.galleryImages.map((img, idx) => (
                                           <div key={idx} className="flex flex-col gap-1.5 bg-white border border-stone-200/50 p-2 rounded-xl shadow-sm">
                                             <img
-                                              src={`http://localhost:9999${img.imageUrl}`}
+                                              src={`${API_BASE_URL}${img.imageUrl}`}
                                               alt={`Attachment ${idx + 1}`}
                                               className="w-full h-24 object-cover rounded-lg"
                                             />
@@ -3452,7 +3452,7 @@ const Dashboard = () => {
                                       throw new Error("Invalid organization ID mapping.");
                                     }
 
-                                    apiClient.post(`http://localhost:9999/api/finance/admin/payout?orgId=${numericOrgId}&amount=${amt}&remarks=${encodeURIComponent(donationRemark.trim())}`)
+                                    apiClient.post(`/finance/admin/payout?orgId=${numericOrgId}&amount=${amt}&remarks=${encodeURIComponent(donationRemark.trim())}`)
                                       .then(() => {
                                           fetchFinancialData();
                                       })
@@ -3960,7 +3960,7 @@ const Dashboard = () => {
                   if (imagesList && imagesList.length > 0) {
                     const imgUrl = imagesList[0]?.imageUrl;
                     if (imgUrl) {
-                      resolvedImage = imgUrl.startsWith('http') ? imgUrl : `http://localhost:9999${imgUrl}`;
+                      resolvedImage = imgUrl.startsWith('http') ? imgUrl : `${API_BASE_URL}${imgUrl}`;
                     }
                   }
                   
@@ -4898,7 +4898,7 @@ const Dashboard = () => {
                         imageId: img.imageId,
                         imageUrl: img.imageUrl,
                         name: img.imageUrl ? img.imageUrl.split('/').pop() : 'image',
-                        url: `http://localhost:9999${img.imageUrl}`
+                        url: `${API_BASE_URL}${img.imageUrl}`
                       }));
 
                       const newOrgObj = {
