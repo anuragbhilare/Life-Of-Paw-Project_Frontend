@@ -47,6 +47,9 @@ const StatCounter = ({ value, suffix }) => {
 
 const Home = () => {
   const [animals, setAnimals] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
+  const [loadingAnimals, setLoadingAnimals] = useState(true);
+  const [loadingOrgs, setLoadingOrgs] = useState(true);
   const [communityPosts, setCommunityPosts] = useState([]);
 
   const getInitials = (name) => {
@@ -124,8 +127,8 @@ const Home = () => {
   useEffect(() => {
     const fetchDatabaseAnimals = async () => {
       try {
-        setLoading(true);
-        const animalsRes = await apiClient.get('/animals/available');
+        setLoadingAnimals(true);
+        const animalsRes = await apiClient.get('/animals/public/featured');
         
         let animalToOrgMap = {};
         try {
@@ -153,45 +156,61 @@ const Home = () => {
             const orgName = animalToOrgMap[animal.animalId] || 'Sanctuary Alliance HQ';
 
             return {
-              id: animal.animalId,
-              name: animal.name,
-              species: animal.species,
-              breed: animal.breed || 'Mixed Breed',
-              age: animal.ageCategory || 'Adult',
-              gender: animal.gender || 'Unknown',
-              description: animal.description || 'A beautiful rescue companion awaiting a loving home.',
-              story: animal.description || 'A beautiful rescue companion awaiting a loving home.',
-              medicalHistory: animal.medicalHistory || null,
-              location: orgName,
-              imageUrl: resolvedImage,
-              image: resolvedImage,
-              status: animal.status || 'AVAILABLE',
-              tags: []
+               id: animal.animalId,
+               name: animal.name,
+               species: animal.species,
+               breed: animal.breed || 'Mixed Breed',
+               age: animal.ageCategory || 'Adult',
+               gender: animal.gender || 'Unknown',
+               description: animal.description || 'A beautiful rescue companion awaiting a loving home.',
+               story: animal.description || 'A beautiful rescue companion awaiting a loving home.',
+               medicalHistory: animal.medicalHistory || null,
+               location: orgName,
+               imageUrl: resolvedImage,
+               image: resolvedImage,
+               status: animal.status || 'AVAILABLE',
+               tags: []
             };
           });
 
-        let finalAnimals = adapted;
-        if (finalAnimals.length < 3) {
-          const needed = 3 - finalAnimals.length;
-          const filler = mockAnimals.slice(0, needed).map(m => ({
-            ...m,
-            id: m.id || `mock-${m.name}`,
-            medicalHistory: 'Healthy and vaccinated.'
-          }));
-          finalAnimals = [...finalAnimals, ...filler];
-        } else {
-          finalAnimals = finalAnimals.slice(0, 3);
-        }
-        setAnimals(finalAnimals);
+        setAnimals(adapted);
       } catch (err) {
-        console.error("Database fetch failed on Home.jsx:", err);
+        console.error("Featured animals fetch failed on Home.jsx:", err);
         setError(err.message);
       } finally {
-        setLoading(false);
+        setLoadingAnimals(false);
+      }
+    };
+
+    const fetchTopOrganizations = async () => {
+      try {
+        setLoadingOrgs(true);
+        const orgsRes = await apiClient.get('/orgs/public/top');
+        const adaptedOrgs = orgsRes.data.map(org => {
+          let logoSymbol = '🐾';
+          if (org.orgName?.toLowerCase().includes('cat')) logoSymbol = '🐱';
+          if (org.orgName?.toLowerCase().includes('dog')) logoSymbol = '🐶';
+          if (org.orgName?.toLowerCase().includes('bird')) logoSymbol = '🐦';
+
+          return {
+            id: org.orgId,
+            name: org.orgName,
+            logo: logoSymbol,
+            rating: 4.9,
+            rescuesCount: org.animals ? org.animals.length : 0,
+            description: org.sanctuaryDescription || 'Partner sanctuary dedicated to animal welfare, rehabilitation, and compassionate placement.'
+          };
+        });
+        setOrganizations(adaptedOrgs);
+      } catch (err) {
+        console.error("Top organizations fetch failed on Home.jsx:", err);
+      } finally {
+        setLoadingOrgs(false);
       }
     };
 
     fetchDatabaseAnimals();
+    fetchTopOrganizations();
   }, []);
 
   useEffect(() => {
@@ -224,7 +243,7 @@ const Home = () => {
     }
   };
 
-  const displayAnimals = error || animals.length === 0 ? mockAnimals.slice(0, 3).map(m => ({ ...m, medicalHistory: 'Healthy and vaccinated.' })) : animals;
+  const displayAnimals = animals;
   
   
   return (
@@ -439,62 +458,75 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {displayAnimals.map((animal, idx) =>  (
-              <ScrollAnimate key={animal.id} delay={idx * 0.1}>
-                <div className="bg-[#F8F5F0] rounded-2xl overflow-hidden shadow-lg border border-[#D8D2C4]/30 group hover:shadow-2xl transition-all duration-500 flex flex-col h-full hover:-translate-y-1">
-                  
-                  <div className="relative h-100 overflow-hidden shrink-0">
-                    <img
-                      src={animal.image}
-                      alt={animal.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            {loadingAnimals ? (
+              <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-[#F8F5F0] rounded-2xl border border-dashed border-[#D8D2C4]/40">
+                <LoaderCircleIcon className="animate-spin text-[#1B4332] mb-3" size={32} />
+                <p className="font-serif text-lg font-bold text-[#1B4332] mb-1">Fetching our featured rescue companions...</p>
+                <p className="text-stone-400 text-xs font-sans">Connecting to Render database server</p>
+              </div>
+            ) : displayAnimals.length === 0 ? (
+              <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-[#F8F5F0] rounded-2xl border border-dashed border-[#D8D2C4]/40">
+                <PawPrint className="text-stone-400 mb-3" size={32} />
+                <p className="font-serif text-lg font-bold text-[#1B4332] mb-1">No featured companions found.</p>
+              </div>
+            ) : (
+              displayAnimals.map((animal, idx) => (
+                <ScrollAnimate key={animal.id} delay={idx * 0.1}>
+                  <div className="bg-[#F8F5F0] rounded-2xl overflow-hidden shadow-lg border border-[#D8D2C4]/30 group hover:shadow-2xl transition-all duration-500 flex flex-col h-full hover:-translate-y-1">
                     
-                    <span className="absolute bottom-4 left-4 text-xs font-semibold text-stone-200 flex items-center gap-1.5">
-                      <Star size={12} className="fill-[#D4A017] text-[#D4A017]" />
-                      {animal.location}
-                    </span>
-                  </div>
-
-                  <div className="p-8 flex flex-col flex-grow">
-                    <div className="flex justify-between items-baseline mb-3">
-                      <h3 className="font-serif text-2xl text-[#1B4332] font-bold">
-                        {animal.name}
-                      </h3>
-                      <span className="text-xs uppercase font-sans tracking-widest font-bold text-[#D4A017]">
-                        {animal.breed}
+                    <div className="relative h-100 overflow-hidden shrink-0">
+                      <img
+                        src={animal.image}
+                        alt={animal.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      
+                      <span className="absolute bottom-4 left-4 text-xs font-semibold text-stone-200 flex items-center gap-1.5">
+                        <Star size={12} className="fill-[#D4A017] text-[#D4A017]" />
+                        {animal.location}
                       </span>
                     </div>
 
-                    <div className="flex gap-4 text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4">
-                      <span>Age / Stage: <strong className="text-[#1B4332]">{animal.age}</strong></span>
-                      <span className="w-[1px] h-3.5 bg-stone-300 self-center" />
-                      <span>Gender: <strong className="text-[#1B4332]">{animal.gender}</strong></span>
+                    <div className="p-8 flex flex-col flex-grow">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <h3 className="font-serif text-2xl text-[#1B4332] font-bold">
+                          {animal.name}
+                        </h3>
+                        <span className="text-xs uppercase font-sans tracking-widest font-bold text-[#D4A017]">
+                          {animal.breed}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-4 text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4">
+                        <span>Age / Stage: <strong className="text-[#1B4332]">{animal.age}</strong></span>
+                        <span className="w-[1px] h-3.5 bg-stone-300 self-center" />
+                        <span>Gender: <strong className="text-[#1B4332]">{animal.gender}</strong></span>
+                      </div>
+
+                      <p className="text-stone-600 font-sans text-sm leading-relaxed mb-4 flex-grow">
+                        {animal.story}
+                      </p>
+
+                      <button 
+                        onClick={() => openMedicalModal(animal)} 
+                        className="text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1 mt-2 mb-6 transition-colors border-none bg-transparent cursor-pointer self-start"
+                      >
+                        <span>🛡️ VIEW MEDICAL RECORD</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleAdoptClick(animal)}
+                        className="w-full py-3 text-center bg-[#1B4332] hover:bg-[#9B2226] text-white rounded-xl text-xs uppercase tracking-[0.2em] font-bold font-sans shadow-md hover:shadow-lg transition-colors duration-300 flex items-center justify-center gap-2 border border-[#D4A017]/25 cursor-pointer"
+                      >
+                        <Heart size={13} className="fill-current text-[#D4A017]" />
+                        Adopt
+                      </button>
                     </div>
-
-                    <p className="text-stone-600 font-sans text-sm leading-relaxed mb-4 flex-grow">
-                      {animal.story}
-                    </p>
-
-                    <button 
-                      onClick={() => openMedicalModal(animal)} 
-                      className="text-xs font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1 mt-2 mb-6 transition-colors border-none bg-transparent cursor-pointer self-start"
-                    >
-                      <span>🛡️ VIEW MEDICAL RECORD</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleAdoptClick(animal)}
-                      className="w-full py-3 text-center bg-[#1B4332] hover:bg-[#9B2226] text-white rounded-xl text-xs uppercase tracking-[0.2em] font-bold font-sans shadow-md hover:shadow-lg transition-colors duration-300 flex items-center justify-center gap-2 border border-[#D4A017]/25 cursor-pointer"
-                    >
-                      <Heart size={13} className="fill-current text-[#D4A017]" />
-                      Adopt
-                    </button>
                   </div>
-                </div>
-              </ScrollAnimate>
-            ))}
+                </ScrollAnimate>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -514,38 +546,51 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {mockNGOs.map((ngo, idx) => (
-              <ScrollAnimate key={ngo.id} delay={idx * 0.1}>
-                <div className="bg-white rounded-2xl p-8 border border-[#D8D2C4]/35 shadow-md flex flex-col justify-between h-full hover:shadow-xl hover:border-[#D4A017]/40 transition-all duration-300">
-                  <div>
-                    <div className="w-14 h-14 bg-[#F8F5F0] border border-[#D4A017]/35 rounded-full flex items-center justify-center text-2xl mb-6 shadow-sm">
-                      {ngo.logo}
+            {loadingOrgs ? (
+              <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-[#D8D2C4]/40">
+                <LoaderCircleIcon className="animate-spin text-[#1B4332] mb-3" size={32} />
+                <p className="font-serif text-lg font-bold text-[#1B4332] mb-1">Loading verified partner sanctuaries...</p>
+                <p className="text-stone-400 text-xs font-sans">Connecting to Render database server</p>
+              </div>
+            ) : organizations.length === 0 ? (
+              <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-[#D8D2C4]/40">
+                <Building className="text-stone-400 mb-3" size={32} />
+                <p className="font-serif text-lg font-bold text-[#1B4332] mb-1">No partner sanctuaries registered yet.</p>
+              </div>
+            ) : (
+              organizations.map((ngo, idx) => (
+                <ScrollAnimate key={ngo.id} delay={idx * 0.1}>
+                  <div className="bg-white rounded-2xl p-8 border border-[#D8D2C4]/35 shadow-md flex flex-col justify-between h-full hover:shadow-xl hover:border-[#D4A017]/40 transition-all duration-300">
+                    <div>
+                      <div className="w-14 h-14 bg-[#F8F5F0] border border-[#D4A017]/35 rounded-full flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        {ngo.logo}
+                      </div>
+
+                      <h3 className="font-serif text-lg text-[#1B4332] font-bold leading-snug mb-3">
+                        {ngo.name}
+                      </h3>
+                      
+                      <span className="inline-flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-4">
+                        <Star size={13} className="fill-[#D4A017] text-[#D4A017]" />
+                        <strong>{ngo.rating}</strong> ({ngo.rescuesCount} Rescues)
+                      </span>
+
+                      <p className="text-stone-600 font-sans text-xs sm:text-sm leading-relaxed mb-6">
+                        {ngo.description}
+                      </p>
                     </div>
 
-                    <h3 className="font-serif text-lg text-[#1B4332] font-bold leading-snug mb-3">
-                      {ngo.name}
-                    </h3>
-                    
-                    <span className="inline-flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-4">
-                      <Star size={13} className="fill-[#D4A017] text-[#D4A017]" />
-                      <strong>{ngo.rating}</strong> ({ngo.rescuesCount} Rescues)
-                    </span>
-
-                    <p className="text-stone-600 font-sans text-xs sm:text-sm leading-relaxed mb-6">
-                      {ngo.description}
-                    </p>
+                    <Link
+                      to="/organizations"
+                      className="text-xs uppercase font-sans tracking-widest font-bold text-[#9B2226] hover:text-[#1B4332] transition-colors flex items-center gap-1 mt-2"
+                    >
+                      View Shelter
+                      <ArrowRight size={12} />
+                    </Link>
                   </div>
-
-                  <Link
-                    to="/organizations"
-                    className="text-xs uppercase font-sans tracking-widest font-bold text-[#9B2226] hover:text-[#1B4332] transition-colors flex items-center gap-1 mt-2"
-                  >
-                    View Shelter
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-              </ScrollAnimate>
-            ))}
+                </ScrollAnimate>
+              ))
+            )}
           </div>
         </div>
       </section>

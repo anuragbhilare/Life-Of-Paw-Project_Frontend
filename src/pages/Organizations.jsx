@@ -387,7 +387,7 @@ const Organizations = () => {
       <div className="min-h-screen bg-[#F8F5F0] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#1B4332] border-t-transparent rounded-full animate-spin" />
-          <p className="font-serif text-[#1B4332] font-semibold text-lg">Fetching Shelter Data...</p>
+          <p className="font-serif text-[#1B4332] font-semibold text-lg">Loading Rescue Organizations...</p>
         </div>
       </div>
     );
