@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Image, X, Sparkles, AlertCircle, PawPrint } from 'lucide-react';
-import { apiCall, apiClient, API_BASE_URL } from '../services/api';
+import { apiCall, apiClient, API_BASE_URL, getImageUrl } from '../services/api';
 
 const formatRelativeTime = (dateString) => {
   if (!dateString) return 'Just now';
@@ -98,7 +98,7 @@ const MessageItem = ({ post }) => {
 
           {post.imageUrl && (
             <img
-              src={post.imageUrl.startsWith('http') ? post.imageUrl : `${API_BASE_URL}${post.imageUrl}`}
+              src={getImageUrl(post.imageUrl)}
               alt="Community post attachment"
               className="rounded-xl max-h-72 object-cover border border-stone-200 mt-3 block shadow-sm hover:shadow-md transition-shadow max-w-full sm:max-w-lg"
             />

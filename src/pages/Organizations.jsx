@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Star, Sparkles, MapPin,ArrowLeft, Calendar, Award, Heart, X, CheckCircle2, ShieldCheck, Shield, BriefcaseMedicalIcon} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScrollAnimate from '../components/ScrollAnimate';
-import { apiClient, API_BASE_URL } from '../services/api';
+import { apiClient, API_BASE_URL, getImageUrl } from '../services/api';
 
 const Organizations = () => {
   const [orgsList, setOrgsList] = useState([]);
@@ -579,9 +579,7 @@ const Organizations = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {selectedOrg.galleryImages.map((img, idx) => {
-                      const finalUrl = img.imageUrl 
-                        ? (img.imageUrl.startsWith('http') ? img.imageUrl : `${API_BASE_URL}${img.imageUrl}`)
-                        : img.url;
+                      const finalUrl = getImageUrl(img.imageUrl || img.url);
                       return (
                         <div key={idx} className="flex flex-col gap-2 bg-[#F8F5F0]/40 border border-stone-250/30 p-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all">
                           <img
@@ -643,7 +641,7 @@ const Organizations = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                       {companions?.map((item, idx) => {
                          const hasImages = item?.images && item.images.length > 0;
-                         const finalAnimalImg = hasImages ? (item.images[0].imageUrl.startsWith('http') ? item.images[0].imageUrl : `${API_BASE_URL}${item.images[0].imageUrl}`) : null;
+                         const finalAnimalImg = hasImages ? getImageUrl(item.images[0].imageUrl) : null;
 
                         return (
                           <ScrollAnimate key={item.animalId || item.id} delay={idx * 0.05}>
@@ -966,7 +964,7 @@ const Organizations = () => {
                 <div className="md:col-span-2 relative h-48 md:h-full min-h-[220px]">
                   {selectedAnimal.images && selectedAnimal.images.length > 0 ? (
                     <img
-                      src={selectedAnimal.images[0].imageUrl.startsWith('http') ? selectedAnimal.images[0].imageUrl : `${API_BASE_URL}${selectedAnimal.images[0].imageUrl}`}
+                      src={getImageUrl(selectedAnimal.images[0].imageUrl)}
                       alt={selectedAnimal.name}
                       className="w-full h-full object-cover"
                     />
