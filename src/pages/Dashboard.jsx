@@ -217,6 +217,17 @@ const Dashboard = () => {
   const [viewMode, setViewMode] = useState('patron');
   const [isVerifiedOverride, setIsVerifiedOverride] = useState(false);
   const [editingCompanionId, setEditingCompanionId] = useState(null);
+  const [companionFilter, setCompanionFilter] = useState('ALL');
+  const [onboardingPreviews, setOnboardingPreviews] = useState([]);
+
+  useEffect(() => {
+    const objectUrls = onboardingFiles.map(file => URL.createObjectURL(file));
+    setOnboardingPreviews(objectUrls);
+    return () => {
+      objectUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [onboardingFiles]);
+
   const userOrg = allianceOrgs.find(org => org && (
     org.ownerEmail === activeUser?.email || 
     (activeUser?.userId && org.ownerId === activeUser?.userId) || 
@@ -591,11 +602,15 @@ const Dashboard = () => {
 
   const handleOrgImagesChange = (e) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 3) {
-      alert("A maximum of 3 images are allowed for the organization gallery.");
-      setOnboardingFiles(files.slice(0, 3));
+    const newTotal = [...onboardingFiles, ...files];
+    if (newTotal.length > 3) {
+      alert("Maximum 3 photos can be added");
+      setOnboardingFiles(newTotal.slice(0, 3));
     } else {
-      setOnboardingFiles(files);
+      setOnboardingFiles(newTotal);
+    }
+    if (e.target) {
+      e.target.value = "";
     }
   };
 
@@ -3977,6 +3992,9 @@ const Dashboard = () => {
                 const displayAnimals = adaptedAnimals.filter(animal => {
                   if (isVerifiedOverride && !userOrg) return true;
                   return animal.ngoId === parentNgoId;
+                }).filter(animal => {
+                  if (companionFilter === 'ALL') return true;
+                  return animal.status?.toUpperCase() === companionFilter;
                 });
                 return (
                   <motion.div
@@ -3998,6 +4016,27 @@ const Dashboard = () => {
                       >
                         REGISTER NEW COMPANION
                       </button>
+                    </div>
+
+                    <div className="flex gap-2 border-b border-stone-200/60 pb-1 font-sans">
+                      {[
+                        { id: 'ALL', label: 'All Animals' },
+                        { id: 'AVAILABLE', label: 'Available' },
+                        { id: 'ADOPTED', label: 'Adopted' }
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setCompanionFilter(tab.id)}
+                          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border-none cursor-pointer ${
+                            companionFilter === tab.id
+                              ? 'bg-[#1B4332] text-white shadow-sm'
+                              : 'bg-transparent text-stone-500 hover:text-[#1B4332] hover:bg-stone-100'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -4065,13 +4104,22 @@ const Dashboard = () => {
                                 
                                 <div className="flex flex-col gap-1 items-center w-full mt-1.5 border-t border-stone-100 pt-1.5">
                                   <div className="flex items-center gap-3">
-                                    <button
-                                      onClick={() => handleEditDossierClick(animal)}
-                                      title="Edit"
-                                      className="p-1 text-[#D4A017] hover:text-[#1B4332] transition-colors cursor-pointer shrink-0"
-                                    >
-                                      <Pencil size={13} className="stroke-[2.5]" />
-                                    </button>
+                                    {animal.status?.toUpperCase() === 'ADOPTED' ? (
+                                      <span
+                                        className="p-1 text-stone-300 cursor-not-allowed shrink-0"
+                                        title="Adopted animal profiles cannot be edited"
+                                      >
+                                        <Pencil size={13} className="stroke-[2.5] opacity-50" />
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleEditDossierClick(animal)}
+                                        title="Edit"
+                                        className="p-1 text-[#D4A017] hover:text-[#1B4332] transition-colors cursor-pointer shrink-0"
+                                      >
+                                        <Pencil size={13} className="stroke-[2.5]" />
+                                      </button>
+                                    )}
                                     <span className="text-stone-300 text-[10px] select-none">|</span>
                                     <button
                                       onClick={() => handleDeleteCompanion(animal.id)}
@@ -5014,7 +5062,7 @@ const Dashboard = () => {
                       <span className="text-[9px] text-red-500 font-semibold">Maximum 3 photos can be added</span>
 
                       <input
-                        required
+                        required={onboardingFiles.length === 0}
                         ref={orgImagesRef}
                         type="file"
                         multiple
@@ -5024,8 +5072,34 @@ const Dashboard = () => {
                       />
                     </label>
                     {onboardingFiles.length > 0 && (
-                      <div className="mt-2 text-[10px] text-[#1B4332] font-semibold text-center select-none font-sans">
-                        🐾 {onboardingFiles.map(f => f.name).join(', ')} added.
+                      <div className="mt-3 grid grid-cols-3 gap-3 font-sans">
+                        {onboardingFiles.map((file, idx) => {
+                          const previewUrl = onboardingPreviews[idx] || '';
+                          return (
+                            <div key={idx} className="relative border border-stone-200 p-2 rounded-xl bg-white shadow-sm flex flex-col items-center gap-1">
+                              {previewUrl && (
+                                <img
+                                  src={previewUrl}
+                                  alt={`Preview ${idx + 1}`}
+                                  className="w-full h-16 object-cover rounded-lg"
+                                />
+                              )}
+                              <span className="text-[8px] text-stone-500 font-semibold truncate w-full text-center block">
+                                {file.name}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOnboardingFiles(prev => prev.filter((_, i) => i !== idx));
+                                }}
+                                className="absolute -top-1.5 -right-1.5 bg-[#7b0016] text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold hover:bg-red-600 transition-colors shadow cursor-pointer border-none"
+                                title="Remove Selected Image"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
