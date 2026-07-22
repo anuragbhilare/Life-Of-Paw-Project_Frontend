@@ -290,6 +290,7 @@ const Dashboard = () => {
           sender: isSentByMe ? 'user' : 'admin',
           text: msg.content,
           createdAt: msg.createdAt,
+          isRead: msg.isRead || msg.read || false,
           time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
         });
       } else {
@@ -319,16 +320,27 @@ const Dashboard = () => {
           sender: isSentByMe ? 'user' : 'org',
           text: msg.content,
           createdAt: msg.createdAt,
+          isRead: msg.isRead || msg.read || false,
           time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
         });
       }
     });
 
-    const ordered = [channelsMap['admin']];
     Object.keys(channelsMap).forEach(key => {
-      if (key !== 'admin') {
-        ordered.push(channelsMap[key]);
-      }
+      const channel = channelsMap[key];
+      const unreadCount = channel.messages.filter(m => m.sender !== 'user' && !m.isRead).length;
+      channel.unreadCount = unreadCount;
+      channel.hasUnread = unreadCount > 0;
+    });
+
+    const ordered = Object.values(channelsMap).sort((a, b) => {
+      const tA = a.messages && a.messages.length > 0
+        ? new Date(a.messages[a.messages.length - 1].createdAt || 0).getTime()
+        : 0;
+      const tB = b.messages && b.messages.length > 0
+        ? new Date(b.messages[b.messages.length - 1].createdAt || 0).getTime()
+        : 0;
+      return tB - tA;
     });
 
     return ordered;
@@ -369,6 +381,7 @@ const Dashboard = () => {
         sender: isSentByMe ? 'user' : 'adopter',
         text: msg.content,
         createdAt: msg.createdAt,
+        isRead: msg.isRead || msg.read || false,
         time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
       });
     });
@@ -405,7 +418,24 @@ const Dashboard = () => {
       }
     }
     
-    return Object.values(channelsMap);
+    Object.keys(channelsMap).forEach(key => {
+      const channel = channelsMap[key];
+      const unreadCount = channel.messages.filter(m => m.sender !== 'user' && !m.isRead).length;
+      channel.unreadCount = unreadCount;
+      channel.hasUnread = unreadCount > 0;
+    });
+
+    const ordered = Object.values(channelsMap).sort((a, b) => {
+      const tA = a.messages && a.messages.length > 0
+        ? new Date(a.messages[a.messages.length - 1].createdAt || 0).getTime()
+        : 0;
+      const tB = b.messages && b.messages.length > 0
+        ? new Date(b.messages[b.messages.length - 1].createdAt || 0).getTime()
+        : 0;
+      return tB - tA;
+    });
+
+    return ordered;
   }, [messagesList, activeUser, ownerSelectedChannelId, inboundRequests]);
 
   const activeChannel = chatChannels.find(ch => ch.id === selectedChannelId) || chatChannels[0];
@@ -422,6 +452,8 @@ const Dashboard = () => {
         sender: senderRole,
         text: msg.content,
         createdAt: msg.createdAt,
+        isRead: msg.isRead,
+        read: msg.read,
         time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
       };
     });
@@ -434,6 +466,8 @@ const Dashboard = () => {
         sender: isSentByMe ? 'user' : 'adopter',
         text: msg.content,
         createdAt: msg.createdAt,
+        isRead: msg.isRead,
+        read: msg.read,
         time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
       };
     });
@@ -1179,20 +1213,26 @@ const Dashboard = () => {
           if (!msg.sender || uniqueUsers.has(msg.sender.userId)) return;
           uniqueUsers.add(msg.sender.userId);
           
+          const userMessages = res.data.filter(m => m.sender?.userId === msg.sender.userId && (m.receiver?.userId === activeUser?.userId || m.receiver?.role === 'admin'));
+          const unreadCount = userMessages.filter(m => !m.isRead && !m.read).length;
+          
           tickets.push({
             id: `ticket-${msg.sender.userId}-${msg.msgId}`,
             userId: msg.sender.userId,
             author: msg.sender.fullName || msg.sender.email,
             content: msg.content,
-            date: msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Today',
+            date: msg.createdAt ? new Date(msg.createdAt).toISOString() : new Date().toISOString(),
             replies: [],
-            repliesCount: 0
+            repliesCount: 0,
+            unreadCount: unreadCount,
+            hasUnread: unreadCount > 0
           });
         });
         
-        if (tickets.length > 0) {
-          setCommunityPosts(tickets);
-          setSelectedPostId(tickets[0].id);
+        const sortedTickets = [...tickets].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        if (sortedTickets.length > 0) {
+          setCommunityPosts(sortedTickets);
+          setSelectedPostId(sortedTickets[0].id);
         }
       } catch (err) {
         console.error("Failed to load admin support feed:", err);
@@ -1324,6 +1364,77 @@ const Dashboard = () => {
     }
   }, [viewMode, activeTab, ownerChatChannels, ownerSelectedChannelId]);
 
+  const handleSelectChannel = async (channelId) => {
+    setSelectedChannelId(channelId);
+    let otherId = channelId === 'admin' ? 41 : parseInt(channelId, 10);
+    
+    setMessagesList(prev => prev.map(msg => {
+      const isFromTarget = msg.sender?.userId === otherId;
+      const isToMe = msg.receiver?.userId === activeUser?.userId;
+      if (isFromTarget && isToMe) {
+        return { ...msg, isRead: true };
+      }
+      return msg;
+    }));
+    
+    try {
+      await apiClient.put(`/social/messages/read/${otherId}`);
+    } catch (e) {
+      console.error("Failed to mark messages as read:", e);
+    }
+  };
+
+  const handleSelectOwnerChannel = async (channelId) => {
+    setOwnerSelectedChannelId(channelId);
+    const otherId = parseInt(channelId, 10);
+    
+    setMessagesList(prev => prev.map(msg => {
+      const isFromTarget = msg.sender?.userId === otherId;
+      const isToMe = msg.receiver?.userId === activeUser?.userId;
+      if (isFromTarget && isToMe) {
+        return { ...msg, isRead: true };
+      }
+      return msg;
+    }));
+    
+    try {
+      await apiClient.put(`/social/messages/read/${otherId}`);
+    } catch (e) {
+      console.error("Failed to mark messages as read:", e);
+    }
+  };
+
+  const handleSelectAdminTicket = async (postId) => {
+    setSelectedPostId(postId);
+    if (postId && typeof postId === 'string' && postId.startsWith('ticket-')) {
+      const parts = postId.split('-');
+      const ticketUserId = parseInt(parts[1], 10);
+      
+      setCommunityPosts(prev => prev.map(p => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            unreadCount: 0,
+            hasUnread: false,
+            replies: p.replies.map(r => {
+              if (r.sender?.userId === ticketUserId) {
+                return { ...r, isRead: true };
+              }
+              return r;
+            })
+          };
+        }
+        return p;
+      }));
+      
+      try {
+        await apiClient.put(`/social/messages/read/${ticketUserId}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const handleSendPatronMessage = async (e) => {
     e.preventDefault();
     if (!patronTypedMessage.trim()) return;
@@ -1373,7 +1484,8 @@ const Dashboard = () => {
         const replies = sortedHistory.map(m => ({
           content: m.content,
           createdAt: m.createdAt || new Date().toISOString(),
-          sender: m.sender
+          sender: m.sender,
+          isRead: m.isRead || m.read || false
         }));
         const adminRepliesCount = sortedHistory.filter(m => m.sender?.userId !== ticketUserId).length;
           
@@ -1383,11 +1495,19 @@ const Dashboard = () => {
               ...p,
               content: firstUserMsg ? firstUserMsg.content : p.content,
               replies: replies,
-              repliesCount: adminRepliesCount
+              repliesCount: adminRepliesCount,
+              unreadCount: 0,
+              hasUnread: false
             };
           }
           return p;
         }));
+
+        try {
+          await apiClient.put(`/social/messages/read/${ticketUserId}`);
+        } catch (readErr) {
+          console.error("Failed to mark ticket messages as read:", readErr);
+        }
       } catch (err) {
         console.error("Failed to load chat history for ticket:", err);
       }
@@ -2958,14 +3078,28 @@ const Dashboard = () => {
                           {communityPosts.map((post) => (
                             <button
                               key={post.id}
-                              onClick={() => setSelectedPostId(post.id)}
+                              onClick={() => handleSelectAdminTicket(post.id)}
                               className={`w-full p-4 text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                                 selectedPostId === post.id ? 'bg-[#F8F5F0] border-l-4 border-[#D4A017]' : 'hover:bg-stone-50'
                               }`}
                             >
-                              <span className="font-serif text-xs font-bold text-[#1B4332] block truncate">{post.author}</span>
-                              <span className="text-[10px] text-stone-600 block line-clamp-2">{post.content}</span>
-                              <span className="text-[9px] text-[#7b0016] uppercase tracking-wider font-extrabold mt-1">Replies: {post.repliesCount}</span>
+                              <div className="flex-grow min-w-0 flex items-center justify-between">
+                                <div className="min-w-0">
+                                  <span className="font-serif text-xs font-bold text-[#1B4332] block truncate">
+                                    {post.author}
+                                    {post.hasUnread && (
+                                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1.5 align-middle" title="Unread messages" />
+                                    )}
+                                  </span>
+                                  <span className="text-[10px] text-stone-600 block line-clamp-2">{post.content}</span>
+                                  <span className="text-[9px] text-[#7b0016] uppercase tracking-wider font-extrabold mt-1 block">Replies: {post.repliesCount}</span>
+                                </div>
+                                {post.unreadCount > 0 && (
+                                  <span className="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 font-sans shadow-sm ml-2">
+                                    {post.unreadCount} pending
+                                  </span>
+                                )}
+                              </div>
                             </button>
                           ))}
                         </div>
@@ -3002,6 +3136,10 @@ const Dashboard = () => {
                                         <div key={rIdx} className="bg-[#1b4332] text-white self-end rounded-2xl rounded-br-none p-3 shadow-sm text-xs max-w-[85%] font-sans mb-3 text-left">
                                           <span className="text-[8px] tracking-widest uppercase font-bold text-[#D4A017] block mb-1">Admin Response</span>
                                           <p>{msg.content}</p>
+                                          <span className="text-[8px] mt-1 text-right block text-white/60">
+                                            {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                                            {(msg.isRead || msg.read) && ' • Seen'}
+                                          </span>
                                         </div>
                                       );
                                     } else {
@@ -3009,6 +3147,9 @@ const Dashboard = () => {
                                         <div key={rIdx} className="bg-gray-100 text-gray-800 self-start rounded-2xl rounded-bl-none p-3 shadow-sm text-xs max-w-[85%] font-sans mb-3 text-left">
                                           <span className="text-[8px] tracking-widest uppercase font-bold text-stone-500 block mb-1">User Inquiry</span>
                                           <p>{msg.content}</p>
+                                          <span className="text-[8px] mt-1 text-right block text-stone-400">
+                                            {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                                          </span>
                                         </div>
                                       );
                                     }
@@ -3857,7 +3998,7 @@ const Dashboard = () => {
                           <button
                             key={channel.id}
                             type="button"
-                            onClick={() => setSelectedChannelId(channel.id)}
+                            onClick={() => handleSelectChannel(channel.id)}
                             className={`w-full p-4 text-left transition-all flex items-center gap-3.5 cursor-pointer border-none bg-transparent ${
                               isActive
                                 ? 'bg-[#F8F5F0] border-l-4 border-[#D4A017]'
@@ -3877,13 +4018,23 @@ const Dashboard = () => {
                               )}
                             </div>
                             
-                            <div className="flex-grow min-w-0">
-                              <span className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] block truncate">
-                                {channel.name}
-                              </span>
-                              <span className="text-[10px] text-[#7b0016] font-semibold uppercase tracking-wider block truncate mt-0.5">
-                                {channel.subtitle}
-                              </span>
+                            <div className="flex-grow min-w-0 flex items-center justify-between">
+                              <div className="min-w-0">
+                                <span className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] block truncate">
+                                  {channel.name}
+                                  {channel.hasUnread && (
+                                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1.5 align-middle" title="Unread messages" />
+                                  )}
+                                </span>
+                                <span className="text-[10px] text-[#7b0016] font-semibold uppercase tracking-wider block truncate mt-0.5">
+                                  {channel.subtitle}
+                                </span>
+                              </div>
+                              {channel.unreadCount > 0 && (
+                                <span className="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 font-sans shadow-sm ml-2">
+                                  {channel.unreadCount} pending
+                                </span>
+                              )}
                             </div>
                           </button>
                         );
@@ -3930,6 +4081,7 @@ const Dashboard = () => {
                                 }`}
                               >
                                 {msg.time}
+                                {msg.sender === 'user' && (msg.isRead || msg.read) && ' • Seen'}
                               </span>
                             </div>
                           ))
@@ -4653,7 +4805,7 @@ const Dashboard = () => {
                             <button
                               key={channel.id}
                               type="button"
-                              onClick={() => setOwnerSelectedChannelId(channel.id)}
+                              onClick={() => handleSelectOwnerChannel(channel.id)}
                               className={`w-full p-4 text-left transition-all flex items-center gap-3.5 cursor-pointer border-none bg-transparent ${
                                 isActive
                                   ? 'bg-[#F8F5F0] border-l-4 border-[#D4A017]'
@@ -4664,13 +4816,23 @@ const Dashboard = () => {
                                 {channel.avatar}
                               </div>
                               
-                              <div className="flex-grow min-w-0">
-                                <span className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] block truncate">
-                                  {channel.name}
-                                </span>
-                                <span className="text-[10px] text-[#7b0016] font-semibold uppercase tracking-wider block truncate mt-0.5">
-                                  {channel.subtitle}
-                                </span>
+                              <div className="flex-grow min-w-0 flex items-center justify-between">
+                                <div className="min-w-0">
+                                  <span className="font-serif text-xs sm:text-sm font-bold text-[#1B4332] block truncate">
+                                    {channel.name}
+                                    {channel.hasUnread && (
+                                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1.5 align-middle" title="Unread messages" />
+                                    )}
+                                  </span>
+                                  <span className="text-[10px] text-[#7b0016] font-semibold uppercase tracking-wider block truncate mt-0.5">
+                                    {channel.subtitle}
+                                  </span>
+                                </div>
+                                {channel.unreadCount > 0 && (
+                                  <span className="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 font-sans shadow-sm ml-2">
+                                    {channel.unreadCount} pending
+                                  </span>
+                                )}
                               </div>
                             </button>
                           );
@@ -4718,6 +4880,7 @@ const Dashboard = () => {
                                 }`}
                               >
                                 {msg.time}
+                                {msg.sender === 'user' && (msg.isRead || msg.read) && ' • Seen'}
                               </span>
                             </div>
                           ))
