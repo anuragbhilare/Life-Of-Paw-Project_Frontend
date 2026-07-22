@@ -218,6 +218,7 @@ const Dashboard = () => {
   const [isVerifiedOverride, setIsVerifiedOverride] = useState(false);
   const [editingCompanionId, setEditingCompanionId] = useState(null);
   const [companionFilter, setCompanionFilter] = useState('ALL');
+  const [onboardingFiles, setOnboardingFiles] = useState([]);
   const [onboardingPreviews, setOnboardingPreviews] = useState([]);
 
   useEffect(() => {
@@ -597,7 +598,6 @@ const Dashboard = () => {
   const companionImageRef = useRef(null);
   const orgImagesRef = useRef(null);
 
-  const [onboardingFiles, setOnboardingFiles] = useState([]);
   const [animalFile, setAnimalFile] = useState(null);
 
   const handleOrgImagesChange = (e) => {
