@@ -53,6 +53,14 @@ const Auth = () => {
       }));
       return;
     }
+    if (name === 'email') {
+      const cleanValue = value.replace(/[A-Z]/g, '').trim();
+      setRegisterData((prev) => ({
+        ...prev,
+        [name]: cleanValue
+      }));
+      return;
+    }
     setRegisterData((prev) => ({
       ...prev,
       [name]: value
@@ -95,11 +103,21 @@ const Auth = () => {
       } catch (err) {
         clearAuthCredentials();
         console.error("Login failed:", err);
-        setErrorMsg(err.message || 'Invalid email or password credentials.');
+        if (err.response?.status === 401) {
+          setErrorMsg("Invalid email or password. Please try again.");
+        } else {
+          setErrorMsg("An unexpected error occurred. Please try again later.");
+        }
       }
     } else {
       if (!registerData.fullName || !registerData.email || !registerData.password || !registerData.phone || !registerData.DOB) {
         setErrorMsg('All fields are required.');
+        return;
+      }
+
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(registerData.password)) {
+        setErrorMsg("Password must contain at least 8 characters, one uppercase letter, one number, and one special character.");
         return;
       }
 
@@ -134,7 +152,7 @@ const Auth = () => {
       try {
         const regPayload = {
           fullName: registerData.fullName,
-          email: registerData.email,
+          email: registerData.email.toLowerCase().trim(),
           password: registerData.password,
           phone: phoneDigits,
           role: 'user',
@@ -142,7 +160,7 @@ const Auth = () => {
         };
         await apiClient.post('/users/register', regPayload);
 
-        setAuthCredentials(registerData.email, registerData.password);
+        setAuthCredentials(registerData.email.toLowerCase().trim(), registerData.password);
         const profile = await apiClient.get('/users/me');
 
         const activeUser = {
@@ -329,6 +347,8 @@ const Auth = () => {
                         name="email"
                         value={registerData.email}
                         onChange={handleRegisterChange}
+                        pattern="[^A-Z]*"
+                        title="Uppercase letters are not allowed in the email address."
                         placeholder="adeline@houseofpaws.com"
                         className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2.5 pl-11 pr-4 text-sm focus:outline-none transition-colors text-stone-800 font-semibold"
                       />
@@ -350,6 +370,9 @@ const Auth = () => {
                         className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2.5 pl-11 pr-4 text-sm focus:outline-none transition-colors text-stone-800 font-semibold"
                       />
                     </div>
+                    <p className="text-[9px] text-stone-500 font-sans mt-1">
+                      Password must contain at least 8 characters, one uppercase letter, one number, and one special character.
+                    </p>
                   </div>
 
                   <div className="flex flex-col gap-1.5">

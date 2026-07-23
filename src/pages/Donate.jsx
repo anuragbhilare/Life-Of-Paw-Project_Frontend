@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, Sparkles, ShieldCheck, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiClient } from '../services/api';
 
 const Donate = () => {
+  const navigate = useNavigate();
+  const activeUser = JSON.parse(sessionStorage.getItem('activeUser') || 'null');
+  
   const [selectedTier, setSelectedTier] = useState('silver');
   const [customAmount, setCustomAmount] = useState('');
+  const [donorName, setDonorName] = useState(activeUser?.fullName || '');
+  const [donorEmail, setDonorEmail] = useState(activeUser?.email || '');
+  const [errorMessage, setErrorMessage] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const tiers = [
@@ -47,6 +54,15 @@ const Donate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    if (activeUser) {
+      if (donorEmail.trim().toLowerCase() !== activeUser.email.trim().toLowerCase()) {
+        setErrorMessage("Email does not match your logged-in account email. Please use your registered email address.");
+        return;
+      }
+    }
+
     let parsedAmount = 0;
     if (customAmount) {
       parsedAmount = parseFloat(customAmount);
@@ -114,7 +130,7 @@ const Donate = () => {
             
             <div className="lg:col-span-2 flex flex-col gap-6">
               <h2 className="font-serif text-xl sm:text-2xl text-[#1B4332] font-bold mb-2">
-                1. Choose Your Life-Saving Contribution
+              Choose Your Life-Saving Contribution
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -175,13 +191,15 @@ const Donate = () => {
                 <div className="relative font-sans max-w-xs w-full">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-lg text-stone-500 font-bold">₹</span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={customAmount}
                     onChange={(e) => {
-                      setCustomAmount(e.target.value);
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setCustomAmount(value);
                       setSelectedTier('');
                     }}
-                    placeholder="99.00"
+                    placeholder="99"
                     className="w-full bg-[#F8F5F0]/60 border border-[#D8D2C4]/60 hover:border-[#D4A017]/60 focus:border-[#D4A017] rounded-full py-3 pl-8 pr-4 text-stone-800 font-semibold focus:outline-none transition-colors"
                   />
                 </div>
@@ -191,7 +209,7 @@ const Donate = () => {
             <div className="bg-white rounded-3xl p-8 border border-[#D4A017]/25 shadow-lg flex flex-col gap-6 lg:mt-11">
               <div className="border-b border-stone-100 pb-4">
                 <h3 className="font-serif text-xl text-[#1B4332] font-bold">
-                  2. Account Details
+                  Account Details
                 </h3>
                 <p className="text-[11px] text-stone-500 font-sans mt-0.5">
                   Secure checkout fully processed under clinical privacy rules.
@@ -200,27 +218,31 @@ const Donate = () => {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">Full Name</label>
+                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">Full Name *</label>
                   <input
                     type="text"
                     required
+                    value={donorName}
+                    onChange={(e) => setDonorName(e.target.value)}
                     placeholder="Your full name" 
                     className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors text-stone-800 font-semibold"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">Email Address</label>
+                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">Email Address *</label>
                   <input
                     type="email"
                     required
+                    value={donorEmail}
+                    onChange={(e) => setDonorEmail(e.target.value)}
                     placeholder="yourname@gmail.com"
                     className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors text-stone-800 font-semibold"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5 mt-2">
-                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">PAYMENT DETAILS</label>
+                  <label className="text-[10px] tracking-widest uppercase font-bold text-stone-500">PAYMENT DETAILS *</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -250,12 +272,32 @@ const Donate = () => {
                   <span>Fully secured 256-bit SSL transaction encryption.</span>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-[#9B2226] border border-[#D4A017]/40 text-white hover:bg-[#1B4332] py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold shadow-xl transition-all duration-300 mt-2"
-                >
-                  MAKE MY DONATION
-                </button>
+                {activeUser ? (
+                  <>
+                    {errorMessage && (
+                      <div className="text-[#9B2226] text-xs font-sans font-bold mt-1 text-center bg-red-50 p-2 rounded-lg border border-red-200">
+                        ⚠️ {errorMessage}
+                      </div>
+                    )}
+                    <button
+                      type="submit"
+                      className="w-full bg-[#9B2226] border border-[#D4A017]/40 text-white hover:bg-[#1B4332] py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold shadow-xl transition-all duration-300 mt-2 cursor-pointer"
+                    >
+                      MAKE MY DONATION
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionStorage.setItem('redirectTo', '/donate');
+                      navigate('/login');
+                    }}
+                    className="w-full bg-[#1B4332] border border-[#D4A017]/40 text-white hover:bg-[#9B2226] py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold shadow-xl transition-all duration-300 mt-2 text-center block cursor-pointer"
+                  >
+                    LOGIN / REGISTER TO DONATE
+                  </button>
+                )}
               </form>
 
             </div>
