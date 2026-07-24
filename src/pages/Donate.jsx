@@ -116,13 +116,13 @@ const Donate = () => {
               Thank You for Your Kind Support
             </h2>
             <p className="text-stone-600 font-sans text-sm sm:text-base leading-relaxed mb-8">
-              Your donation registration has been accepted. We will deliver your premium Patron Badge packet and custom rescue profile to your email shortly.
+              Your generosity helps provide food, medical care, shelter, and a second chance to animals waiting for a loving home. Every contribution brings hope to a life that needs it most.
             </p>
             <button
               onClick={() => setFormSubmitted(false)}
               className="bg-[#1B4332] text-white border border-[#D4A017]/30 hover:bg-[#9B2226] px-8 py-3 rounded-full text-xs font-sans tracking-[0.25em] uppercase font-bold transition-all shadow-md"
             >
-              Support Another Cause
+              Support More Lives
             </button>
           </motion.div>
         ) : (
