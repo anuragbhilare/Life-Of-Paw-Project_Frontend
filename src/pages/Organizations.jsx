@@ -302,6 +302,14 @@ const Organizations = () => {
       );
       navigate('/login');
     } else {
+      if (selectedOrg) {
+        if ((selectedOrg.ownerEmail && selectedOrg.ownerEmail.toLowerCase() === activeUser.email.toLowerCase()) ||
+            (selectedOrg.ownerId && selectedOrg.ownerId === activeUser.userId)) {
+          alert("You cannot submit an adoption request for an animal listed by your own organization.");
+          return;
+        }
+      }
+
       setDossierForm({
         userId: activeUser.userId || 63,
         animalId: animal.animalId || animal.id,
@@ -361,6 +369,15 @@ const Organizations = () => {
   const handleSubmitDossier = async (e) => {
     e.preventDefault();
     if (!dossierForm.reason) return;
+
+    const activeUser = JSON.parse(sessionStorage.getItem('activeUser'));
+    if (activeUser && selectedOrg) {
+      if ((selectedOrg.ownerEmail && selectedOrg.ownerEmail.toLowerCase() === activeUser.email.toLowerCase()) ||
+          (selectedOrg.ownerId && selectedOrg.ownerId === activeUser.userId)) {
+        alert("You cannot submit an adoption request for an animal listed by your own organization.");
+        return;
+      }
+    }
 
     try {
       const currentAnimalId = selectedAnimal.animalId || selectedAnimal.id;
@@ -949,7 +966,7 @@ const Organizations = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.3 }}
-              className="bg-[#F8F5F0] rounded-3xl h-[550px] max-h-[90vh] border border-[#D4A017]/40 shadow-2xl relative overflow-hidden w-full max-w-7xl"
+              className="bg-[#F8F5F0] rounded-3xl max-w-4xl w-full min-h-[500px] h-auto border border-[#D4A017]/40 shadow-2xl relative overflow-hidden"
             >
               <button
                 onClick={() => setIsAdoptModalOpen(false)}
@@ -959,17 +976,17 @@ const Organizations = () => {
                 <X size={24} />
               </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-5 h-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 h-full min-h-[500px] w-full">
                 
-                <div className="md:col-span-2 relative h-48 md:h-full min-h-[220px]">
+                <div className="relative h-64 md:h-full w-full min-h-[250px] md:min-h-[500px]">
                   {selectedAnimal.images && selectedAnimal.images.length > 0 ? (
                     <img
                       src={getImageUrl(selectedAnimal.images[0].imageUrl)}
                       alt={selectedAnimal.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover absolute inset-0"
                     />
                   ) : (
-                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-stone-400 font-sans text-xs uppercase tracking-wider">
+                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-stone-400 font-sans text-xs uppercase tracking-wider absolute inset-0">
                       No Photo Available
                     </div>
                   )}
@@ -981,7 +998,7 @@ const Organizations = () => {
                   </div>
                 </div>
 
-                <div className="md:col-span-3 p-8 sm:p-10 flex flex-col justify-center bg-white overflow-y-auto h-full max-h-[calc(90vh-120px)] md:max-h-full">
+                <div className="p-8 sm:p-10 flex flex-col justify-center bg-white h-full min-h-[400px] md:min-h-[500px] overflow-y-auto">
                   {submissionSuccess ? (
                     <motion.div
                       initial={{ opacity: 0 }}

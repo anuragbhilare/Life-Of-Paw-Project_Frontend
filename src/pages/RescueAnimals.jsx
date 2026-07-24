@@ -48,11 +48,15 @@ const RescueAnimals = () => {
         setIsLoading(true);
         let animalToOrgMap = {};
         let animalToOrgIdMap = {};
+        let animalToOrgEmailMap = {};
+        let animalToOrgUserIdMap = {};
         try {
           const orgsRes = await apiClient.get('/orgs/all');
           orgsRes.data.forEach(org => {
             const orgName = org.orgName || org.ORG_NAME || 'Sanctuary Alliance HQ';
             const orgId = org.orgId || org.ORG_ID;
+            const contactEmail = org.contactPerson?.email || org.contactPerson?.EMAIL;
+            const contactUserId = org.contactPerson?.userId || org.contactPerson?.USER_ID;
             const animals = org.animals || org.ANIMALS;
             if (animals) {
               animals.forEach(ani => {
@@ -61,6 +65,12 @@ const RescueAnimals = () => {
                   animalToOrgMap[aId] = orgName;
                   if (orgId) {
                     animalToOrgIdMap[aId] = orgId;
+                  }
+                  if (contactEmail) {
+                    animalToOrgEmailMap[aId] = contactEmail;
+                  }
+                  if (contactUserId) {
+                    animalToOrgUserIdMap[aId] = contactUserId;
                   }
                 }
               });
@@ -111,6 +121,8 @@ const RescueAnimals = () => {
             image: resolvedImage,
             status: status,
             ngoId: ngoId,
+            organizationEmail: animalToOrgEmailMap[aId] || animal.organization?.contactPerson?.email || '',
+            organizationContactUserId: animalToOrgUserIdMap[aId] || animal.organization?.contactPerson?.userId || null,
             tags: []
           };
         });
@@ -142,6 +154,16 @@ const RescueAnimals = () => {
       if (animal) {
         const activeUser = JSON.parse(sessionStorage.getItem('activeUser'));
         if (activeUser) {
+          const orgEmail = animal.organizationEmail;
+          const orgContactUserId = animal.organizationContactUserId;
+
+          if ((orgEmail && orgEmail.toLowerCase() === activeUser.email.toLowerCase()) ||
+              (orgContactUserId && orgContactUserId === activeUser.userId)) {
+            alert("You cannot submit an adoption request for an animal listed by your own organization.");
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          }
+
           setDossierForm({
             userId: activeUser.userId || 63,
             animalId: animal.id,
@@ -207,6 +229,15 @@ const RescueAnimals = () => {
       );
       navigate('/login');
     } else {
+      const orgEmail = animal.organizationEmail;
+      const orgContactUserId = animal.organizationContactUserId;
+
+      if ((orgEmail && orgEmail.toLowerCase() === activeUser.email.toLowerCase()) ||
+          (orgContactUserId && orgContactUserId === activeUser.userId)) {
+        alert("You cannot submit an adoption request for an animal listed by your own organization.");
+        return;
+      }
+
       setDossierForm({
         userId: activeUser.userId || 63, 
         animalId: animal.id, 
@@ -230,6 +261,18 @@ const RescueAnimals = () => {
   const handleSubmitDossier = async (e) => {
     e.preventDefault();
     if (!dossierForm.reason) return;
+
+    const activeUser = JSON.parse(sessionStorage.getItem('activeUser'));
+    if (activeUser && selectedAnimal) {
+      const orgEmail = selectedAnimal.organizationEmail;
+      const orgContactUserId = selectedAnimal.organizationContactUserId;
+
+      if ((orgEmail && orgEmail.toLowerCase() === activeUser.email.toLowerCase()) ||
+          (orgContactUserId && orgContactUserId === activeUser.userId)) {
+        alert("You cannot submit an adoption request for an animal listed by your own organization.");
+        return;
+      }
+    }
 
     try {
       await apiClient.post('/adoptions/apply', null, {
@@ -406,7 +449,7 @@ const RescueAnimals = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.3 }}
-              className="bg-[#F8F5F0] rounded-3xl h-[550px] max-h-[90vh] border border-[#D4A017]/40 shadow-2xl relative overflow-hidden"
+              className="bg-[#F8F5F0] rounded-3xl max-w-4xl w-full min-h-[500px] h-auto border border-[#D4A017]/40 shadow-2xl relative overflow-hidden"
             >
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -416,13 +459,13 @@ const RescueAnimals = () => {
                 <X size={24} />
               </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-5 h-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 h-full min-h-[500px] w-full">
                 
-                <div className="md:col-span-2 relative h-48 md:h-full min-h-[220px]">
+                <div className="relative h-64 md:h-full w-full min-h-[250px] md:min-h-[500px]">
                   <img
                     src={selectedAnimal.image}
                     alt={selectedAnimal.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover absolute inset-0"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/90 via-[#1B4332]/40 to-transparent" />
                   <div className="absolute bottom-6 left-6 text-[#F8F5F0] relative z-10">
@@ -432,7 +475,7 @@ const RescueAnimals = () => {
                   </div>
                 </div>
 
-                <div className="md:col-span-3 p-8 sm:p-10 flex flex-col justify-center bg-white">
+                <div className="p-8 sm:p-10 flex flex-col justify-center bg-white h-full min-h-[400px] md:min-h-[500px] overflow-y-auto">
                   {submissionSuccess ? (
                     <motion.div
                       initial={{ opacity: 0 }}
