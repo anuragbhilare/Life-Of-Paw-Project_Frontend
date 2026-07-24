@@ -97,15 +97,15 @@ const Footer = () => {
             <ul className="flex flex-col space-y-4 font-sans text-sm text-[#F8F5F0]/80">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#D4A017] shrink-0 mt-0.5" />
-                <span>Life of Paw Rescue Network,<br />Pune, Maharashtra, India</span>
+                <span>Pune, Maharashtra, India</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="text-[#D4A017] shrink-0" />
-                <span className="font-semibold">+91 XXXXX XXXXX</span>
+                <span className="font-semibold">+91 75585 80815</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#D4A017] shrink-0" />
-                <span className="font-semibold">support@lifeofpaw.org</span>
+                <span className="font-semibold">anuragbhilare8@gmail.com</span>
               </li>
             </ul>
           </div>
