@@ -479,10 +479,10 @@ const RescueAnimals = () => {
 
                 
 
-                  <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
+                  <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-3xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
                     
                     <span>Thanks for adopting me!</span>
-                    <span className="text-[#D4A017]">❤︎</span>
+                    <span className="text-[#ffffff]">♥︎</span>
                   </div>
                 </div>
 
@@ -531,7 +531,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                          Tell us about the home environment you will provide
+                        Tell us about the home environment you will provide
                         </label>
                         <textarea
                           required
@@ -557,7 +557,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                         Your location
+                        Your location
                         </label>
                         <div className="relative">
                           <input
