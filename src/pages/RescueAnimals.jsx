@@ -475,21 +475,14 @@ const RescueAnimals = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/95 via-[#1B4332]/45 to-transparent" />
                   
-                  <div className="absolute top-10 left-10 text-white z-10 flex flex-col items-start gap-1 font-cursive drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-                    <div className="relative">
-                      <span className="text-3xl font-bold tracking-wide">Thanks</span>
-                      <span className="absolute -top-3 -right-8 text-red-400 text-3xl transform rotate-12">❤️</span>
-                    </div>
-                    <div className="text-1xl font-bold mt-1">for adopting me!</div>
-                    <div className="w-24 h-[2px] bg-white mt-1 opacity-80" />
-                    <span className="text-red-400 text-xl mt-1">❤️</span>
-                  </div>
+                  
 
                 
 
                   <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
-                    <span className="text-[#D4A017]">🐾</span>
-                    <span>Every love story begins with compassion.</span>
+                    
+                    <span>Thanks for adopting me!</span>
+                    <span className="text-[#D4A017]">❤︎</span>
                   </div>
                 </div>
 
@@ -526,11 +519,7 @@ const RescueAnimals = () => {
                           the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves❤️
                         </h4>
                         
-                        <div className="flex items-center justify-center gap-2 mt-1.5">
-                          <span className="w-8 h-[1px] bg-[#D4A017]/40" />
-                          <span className="text-[#7B0016] text-[10px]">❤️</span>
-                          <span className="w-8 h-[1px] bg-[#D4A017]/40" />
-                        </div>
+                    
                         
                         <p className="text-[#7B0016] font-sans text-[10px] text-center mt-2 flex items-center justify-center gap-1.5 font-bold uppercase tracking-wider">
                           Please fill in a few details so we can make sure it's the perfect match! 🐾
