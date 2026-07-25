@@ -449,8 +449,14 @@ const RescueAnimals = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.3 }}
-              className="bg-[#F8F5F0] rounded-3xl max-w-4xl w-full min-h-[500px] h-auto border border-[#D4A017]/40 shadow-2xl relative overflow-hidden"
+              className="bg-[#FDFBF7] rounded-3xl max-w-5xl w-full aspect-[16/9] min-h-[550px] border border-[#D4A017]/40 shadow-2xl relative overflow-hidden flex flex-col md:flex-row"
             >
+              <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@700&display=swap');
+                .font-cursive {
+                  font-family: 'Caveat', 'Dancing Script', cursive;
+                }
+              `}</style>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="absolute top-5 right-5 text-stone-600 hover:text-[#7b0016] transition-colors z-20 cursor-pointer"
@@ -459,23 +465,39 @@ const RescueAnimals = () => {
                 <X size={24} />
               </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 h-full min-h-[500px] w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 h-full min-h-[550px] w-full">
                 
-                <div className="relative h-64 md:h-full w-full min-h-[250px] md:min-h-[500px]">
+                <div className="relative h-64 md:h-full w-full min-h-[250px] md:min-h-[550px]">
                   <img
                     src={selectedAnimal.image}
                     alt={selectedAnimal.name}
                     className="w-full h-full object-cover absolute inset-0"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/90 via-[#1B4332]/40 to-transparent" />
-                  <div className="absolute bottom-6 left-6 text-[#F8F5F0] relative z-10">
-                    <span className="text-[15px] uppercase tracking-widest text-[#D4A017] font-bold">Thanks for giving me a home!❤️</span>
-                    <h3 className="font-serif text-3xl font-bold mt-1">{selectedAnimal.name}</h3>
-                    <p className="text-xs text-stone-300 font-semibold mt-1 uppercase tracking-wide">{selectedAnimal.breed}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/95 via-[#1B4332]/45 to-transparent" />
+                  
+                  <div className="absolute top-10 left-10 text-white z-10 flex flex-col items-start gap-1 font-cursive drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+                    <div className="relative">
+                      <span className="text-5xl font-bold tracking-wide">Thanks</span>
+                      <span className="absolute -top-3 -right-8 text-red-400 text-3xl transform rotate-12">❤️</span>
+                    </div>
+                    <div className="text-3xl font-bold mt-1">for adopting me!</div>
+                    <div className="w-24 h-[2px] bg-white mt-1 opacity-80" />
+                    <span className="text-red-400 text-xl mt-1">❤️</span>
+                  </div>
+
+                  <div className="absolute left-10 top-1/2 -translate-y-1/2 text-white z-10 max-w-[80%] text-sm font-medium leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-left font-sans">
+                    <p>You're not just giving me a home,</p>
+                    <p>you're giving me a second chance</p>
+                    <p>at happiness. ❤️</p>
+                  </div>
+
+                  <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
+                    <span className="text-[#D4A017]">🐾</span>
+                    <span>Every love story begins with compassion.</span>
                   </div>
                 </div>
 
-                <div className="p-8 sm:p-10 flex flex-col justify-center bg-white h-full min-h-[400px] md:min-h-[500px] overflow-y-auto">
+                <div className="p-8 md:p-12 flex flex-col justify-center bg-[#FDFBF7] h-full min-h-[550px] overflow-y-auto">
                   {submissionSuccess ? (
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -497,58 +519,85 @@ const RescueAnimals = () => {
                   ) : (
                     <form onSubmit={handleSubmitDossier} className="flex flex-col gap-4 font-sans text-left">
                       
-                      <div>
-                        <span className="text-[10px] tracking-[0.2em] text-[#D4A017] uppercase font-bold block mb-1">APPLICATION DETAILS</span>
-                        <h4 className="font-serif text-2xl text-[#1B4332] font-bold">Apply for Guardianship</h4>
-                        <div className="w-8 h-[1px] bg-[#D4A017] mt-3 mb-4" />
+                      <div className="flex flex-col items-center">
+                        <div className="relative w-12 h-12 flex items-center justify-center text-[#7B0016] border-2 border-dashed border-[#7B0016]/30 rounded-full p-2 bg-[#7B0016]/5">
+                          <span className="text-2xl animate-pulse">🏠</span>
+                          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] mt-1">❤️</span>
+                        </div>
+                        
+                        <h4 className="font-serif text-xl md:text-2xl text-[#1B4332] font-bold text-center mt-2 leading-snug">
+                          Let's give {selectedAnimal.name} <br className="hidden md:inline" />
+                          the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves ❤️
+                        </h4>
+                        
+                        <div className="flex items-center justify-center gap-2 mt-1.5">
+                          <span className="w-8 h-[1px] bg-[#D4A017]/40" />
+                          <span className="text-[#7B0016] text-[10px]">❤️</span>
+                          <span className="w-8 h-[1px] bg-[#D4A017]/40" />
+                        </div>
+                        
+                        <p className="text-[#7B0016] font-sans text-[10px] text-center mt-2 flex items-center justify-center gap-1.5 font-bold uppercase tracking-wider">
+                          Please fill in a few details so we can make sure it's the perfect match! 🐾
+                        </p>
                       </div>
 
                       <input type="hidden" name="userId" value={dossierForm.userId} />
                       <input type="hidden" name="animalId" value={dossierForm.animalId} />
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] tracking-widest uppercase font-bold text-stone-500">Reason for Adoption *</label>
+                        <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
+                          <span className="text-red-500">❤️</span> Tell us about the home environment you will provide
+                        </label>
                         <textarea
                           required
                           name="reason"
-                          rows={3}
+                          rows={2}
                           value={dossierForm.reason}
                           onChange={handleInputChange}
-                          placeholder="Tell us about the home environment you will provide..."
-                          className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2 px-3 text-sm focus:outline-none transition-colors text-stone-850 font-semibold focus:ring-1 focus:ring-[#D4A017] resize-none"
+                          placeholder="e.g., I have a spacious home with a balcony and safe surroundings..."
+                          className="w-full bg-stone-50 border border-[#D8D2C4]/70 hover:border-[#D4A017]/40 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] rounded-xl py-2.5 px-3.5 text-xs focus:outline-none transition-all text-stone-850 font-medium resize-none"
                         />
                       </div>  
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] tracking-widest uppercase font-bold text-stone-500">Pet Ownership Experience *</label>
+                        <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
+                          <span className="text-red-500">❤️</span> Pet ownership experience
+                        </label>
                         <input
                           type="text"
-                          placeholder="Please describe your previous pet ownership history, or how you have prepared for your first companion:"
-                          className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2 px-3 text-sm focus:outline-none transition-colors text-stone-850 font-semibold focus:ring-1 focus:ring-[#D4A017] resize-none"
+                          placeholder="e.g., I've had pets before and understand their needs..."
+                          className="w-full bg-stone-50 border border-[#D8D2C4]/70 hover:border-[#D4A017]/40 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] rounded-xl py-2.5 px-3.5 text-xs focus:outline-none transition-all text-stone-850 font-medium"
                         />
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] tracking-widest uppercase font-bold text-stone-500">Your Location *</label>
-                        <input
-                          required
-                          type="text"
-                          name="location"
-                          value={dossierForm.location}
-                          onChange={handleInputChange}
-                          placeholder="Bandra, Mumbai"
-                          className="w-full bg-[#F8F5F0]/70 border border-[#D8D2C4]/60 hover:border-[#D4A017]/40 focus:border-[#D4A017] rounded-lg py-2 px-3 text-sm focus:outline-none transition-colors text-stone-850 font-semibold focus:ring-1 focus:ring-[#D4A017] resize-none"
-                        />
+                        <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
+                          <span className="text-red-500">❤️</span> Your location
+                        </label>
+                        <div className="relative">
+                          <input
+                            required
+                            type="text"
+                            name="location"
+                            value={dossierForm.location}
+                            onChange={handleInputChange}
+                            placeholder="Bandra, Mumbai"
+                            className="w-full bg-stone-50 border border-[#D8D2C4]/70 hover:border-[#D4A017]/40 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] rounded-xl py-2.5 px-3.5 text-xs focus:outline-none transition-all text-stone-850 font-medium"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">📍</span>
+                        </div>
                       </div>
-                      
 
                       <button
                         type="submit"
-                        className="w-full bg-[#7b0016] text-[#F8F5F0] hover:bg-[#1B4332] py-3.5 rounded-full text-xs uppercase tracking-[0.2em] font-bold shadow-xl transition-all duration-300 mt-2 flex items-center justify-center gap-1.5 border border-[#D4A017]/30 cursor-pointer"
+                        className="w-full bg-[#7B0016] text-white hover:bg-[#1B4332] py-3.5 rounded-full text-xs uppercase tracking-[0.25em] font-bold shadow-xl transition-all duration-300 mt-3 flex items-center justify-center gap-2 border border-[#D4A017]/30 cursor-pointer transform active:scale-95 animate-pulse"
                       >
-                        <Heart size={14} className="text-[#D4A017] fill-current" />
-                        SUBMIT REQUEST
+                        <span>❤️ Yes, I Promise to Love & Care</span>
                       </button>
+
+                      <p className="text-[10px] text-[#7B0016] font-sans text-center mt-2 flex items-center justify-center gap-1 font-extrabold uppercase tracking-wider">
+                        <span>🐾 Because every tail deserves a happy home.</span>
+                      </p>
 
                     </form>
                   )}
