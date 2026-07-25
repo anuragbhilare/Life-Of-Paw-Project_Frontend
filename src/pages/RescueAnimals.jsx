@@ -477,19 +477,15 @@ const RescueAnimals = () => {
                   
                   <div className="absolute top-10 left-10 text-white z-10 flex flex-col items-start gap-1 font-cursive drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
                     <div className="relative">
-                      <span className="text-5xl font-bold tracking-wide">Thanks</span>
+                      <span className="text-3xl font-bold tracking-wide">Thanks</span>
                       <span className="absolute -top-3 -right-8 text-red-400 text-3xl transform rotate-12">❤️</span>
                     </div>
-                    <div className="text-3xl font-bold mt-1">for adopting me!</div>
+                    <div className="text-1xl font-bold mt-1">for adopting me!</div>
                     <div className="w-24 h-[2px] bg-white mt-1 opacity-80" />
                     <span className="text-red-400 text-xl mt-1">❤️</span>
                   </div>
 
-                  <div className="absolute left-10 top-1/2 -translate-y-1/2 text-white z-10 max-w-[80%] text-sm font-medium leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-left font-sans">
-                    <p>You're not just giving me a home,</p>
-                    <p>you're giving me a second chance</p>
-                    <p>at happiness. ❤️</p>
-                  </div>
+                
 
                   <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
                     <span className="text-[#D4A017]">🐾</span>
@@ -527,7 +523,7 @@ const RescueAnimals = () => {
                         
                         <h4 className="font-serif text-xl md:text-2xl text-[#1B4332] font-bold text-center mt-2 leading-snug">
                           Let's give {selectedAnimal.name} <br className="hidden md:inline" />
-                          the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves ❤️
+                          the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves❤️
                         </h4>
                         
                         <div className="flex items-center justify-center gap-2 mt-1.5">
@@ -546,7 +542,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                          <span className="text-red-500">❤️</span> Tell us about the home environment you will provide
+                          Tell us about the home environment you will provide
                         </label>
                         <textarea
                           required
@@ -561,7 +557,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                          <span className="text-red-500">❤️</span> Pet ownership experience
+                        Pet ownership experience
                         </label>
                         <input
                           type="text"
@@ -572,7 +568,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                          <span className="text-red-500">❤️</span> Your location
+                         Your location
                         </label>
                         <div className="relative">
                           <input
