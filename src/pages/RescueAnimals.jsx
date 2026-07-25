@@ -482,7 +482,7 @@ const RescueAnimals = () => {
                   <div className="absolute bottom-8 left-10 z-10 bg-black/35 backdrop-blur-md px-4 py-3 rounded-3xl border border-white/20 text-[#F8F5F0] text-xs font-bold font-sans flex items-center gap-2 shadow-lg">
                     
                     <span>Thanks for adopting me!</span>
-                    <span className="text-[#ffffff]">♥︎</span>
+                    <span className="text-[#ffffff]">❤</span>
                   </div>
                 </div>
 
