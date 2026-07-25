@@ -1038,7 +1038,7 @@ const Organizations = () => {
                         
                         <h4 className="font-serif text-xl md:text-2xl text-[#1B4332] font-bold text-center mt-2 leading-snug">
                           Let's give {selectedAnimal.name} <br className="hidden md:inline" />
-                          the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves ❤️
+                          the loving home {selectedAnimal.gender?.toLowerCase() === 'female' ? 'she' : 'he'} deserves❤️
                         </h4>
                        
                         
@@ -1052,7 +1052,7 @@ const Organizations = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Tell us about the home environment you will provide
+                        Tell us about the home environment you will provide *
                         </label>
                         <textarea
                           required
@@ -1067,7 +1067,7 @@ const Organizations = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Pet ownership experience
+                        Pet ownership experience *
                         </label>
                         <input
                           type="text"
@@ -1078,7 +1078,7 @@ const Organizations = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Your location
+                        Your location *
                         </label>
                         <div className="relative">
                           <input

@@ -531,7 +531,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Tell us about the home environment you will provide
+                        Tell us about the home environment you will provide *
                         </label>
                         <textarea
                           required
@@ -546,7 +546,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Pet ownership experience
+                        Pet ownership experience *
                         </label>
                         <input
                           type="text"
@@ -557,7 +557,7 @@ const RescueAnimals = () => {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] tracking-widest uppercase font-bold text-stone-600 flex items-center gap-1">
-                        Your location
+                        Your location *
                         </label>
                         <div className="relative">
                           <input
