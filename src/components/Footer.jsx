@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter, Mail, MapPin, Phone, ArrowUp, Send, Heart } from 'lucide-react';
+import { Github, Linkedin, Mail, MapPin, Phone, ArrowUp, Send, Heart } from 'lucide-react';
 
 const Footer = () => {
   const handleScrollToTop = () => {
@@ -8,10 +8,9 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: <Facebook size={18} />, url: 'https://facebook.com', label: 'Facebook' },
-    { icon: <Instagram size={18} />, url: 'https://instagram.com', label: 'Instagram' },
-    { icon: <Twitter size={18} />, url: 'https://twitter.com', label: 'Twitter' },
-    { icon: <Mail size={18} />, url: 'mailto:contact@lifeofpaw.org', label: 'Email' }
+    { icon: <Github size={18} />, url: 'https://github.com/anuragbhilare', label: 'GitHub' },
+    { icon: <Linkedin size={18} />, url: 'https://www.linkedin.com/in/anuragbhilare19', label: 'LinkedIn' },
+    { icon: <Mail size={18} />, url: 'mailto:anuragbhilare8@gmail.com', label: 'Email' }
   ];
 
   return (
@@ -41,8 +40,7 @@ const Footer = () => {
                 <a
                   key={index}
                   href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  {...(social.url.startsWith('mailto:') ? {} : { target: "_blank", rel: "noopener noreferrer" })}
                   className="w-10 h-10 rounded-full border border-[#D4A017]/30 flex items-center justify-center text-[#F8F5F0] hover:text-[#D4A017] hover:border-[#D4A017] hover:bg-[#F8F5F0]/5 transition-all duration-300 transform hover:-translate-y-1"
                   aria-label={social.label}
                 >
