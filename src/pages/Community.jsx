@@ -54,6 +54,13 @@ const fallbackMockPosts = [
   }   
 ];
 
+const getCommunityAvatar = (avatar, author) => {
+  if (!avatar || avatar.includes('photo-1543466835-00a7907e9de1')) {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(author || 'User')}&background=1B4332&color=fff`;
+  }
+  return getImageUrl(avatar);
+};
+
 const MessageItem = ({ post }) => {
   return (
     <div 
@@ -65,17 +72,11 @@ const MessageItem = ({ post }) => {
       }`}
     >
       <div className="flex items-start gap-4">
-        {post.avatar && post.avatar.startsWith('http') ? (
-          <img
-            src={post.avatar}
-            alt={post.author}
-            className="w-10 h-10 rounded-full object-cover border border-[#D4A017]/25 shrink-0 shadow-sm"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-[#1B4332] text-white flex items-center justify-center font-bold text-sm shrink-0 border border-[#D4A017]/35 shadow-sm">
-            {post.author.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <img
+          src={getCommunityAvatar(post.avatar, post.author)}
+          alt={post.author}
+          className="w-10 h-10 rounded-full object-cover border border-[#D4A017]/25 shrink-0 shadow-sm"
+        />
 
         <div className="flex-grow min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-1.5">

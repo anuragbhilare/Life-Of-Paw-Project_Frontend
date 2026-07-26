@@ -73,7 +73,12 @@ const Home = () => {
     });
   };
 
-  const getAvatarUrl = (avatar) => getImageUrl(avatar);
+  const getAvatarUrl = (avatar, name) => {
+    if (!avatar || avatar.includes('photo-1543466835-00a7907e9de1')) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=1B4332&color=fff`;
+    }
+    return getImageUrl(avatar);
+  };
 
   const getPostMetaData = (msgId) => {
     switch (msgId) {
@@ -672,8 +677,8 @@ const Home = () => {
             ) : (
               communityPosts.map((msg, idx) => {
                 const meta = getPostMetaData(msg.msgId);
-                const avatarUrl = getAvatarUrl(msg.sender?.avatar);
                 const authorName = msg.sender?.fullName || 'Anonymous Patron';
+                const avatarUrl = getAvatarUrl(msg.sender?.avatar, authorName);
                 const postDate = formatDate(msg.createdAt);
 
                 const truncateContent = (text, maxLength = 130) => {
@@ -701,17 +706,11 @@ const Home = () => {
 
                       <div className="flex items-center justify-between border-t border-stone-200/60 pt-4 mt-6">
                         <div className="flex items-center gap-3">
-                          {avatarUrl ? (
-                            <img
-                              src={avatarUrl}
-                              alt={authorName}
-                              className="w-8 h-8 rounded-full object-cover border border-[#D4A017]/25 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shrink-0 border border-[#D4A017]/35 shadow-sm">
-                              {getInitials(authorName)}
-                            </div>
-                          )}
+                          <img
+                            src={avatarUrl}
+                            alt={authorName}
+                            className="w-8 h-8 rounded-full object-cover border border-[#D4A017]/25 shrink-0 shadow-sm"
+                          />
                           <div className="text-[11px] font-semibold text-stone-500 font-sans">
                             <span className="text-[#1B4332] block font-bold">{authorName}</span>
                             <span className="text-[10px] text-stone-400">{postDate}</span>
