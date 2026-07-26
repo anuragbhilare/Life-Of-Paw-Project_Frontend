@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, MapPin, Phone, ArrowUp, Send, Heart } from 'lucide-react';
+import { Github, Linkedin, Mail, MapPin, Phone, ArrowUp, Heart } from 'lucide-react';
 
 const Footer = () => {
   const handleScrollToTop = () => {
@@ -103,35 +103,40 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#D4A017] shrink-0" />
-                <span className="font-semibold">anuragbhilare8@gmail.com</span>
+                <a href="mailto:anuragbhilare8@gmail.com" className="font-semibold hover:text-[#D4A017] hover:underline transition-colors duration-350">
+                  anuragbhilare8@gmail.com
+                </a>
               </li>
             </ul>
           </div>
 
           <div className="flex flex-col space-y-6">
             <h4 className="font-serif text-lg tracking-widest text-[#D4A017] uppercase font-bold">
-              The Paw Journal
+              MEET THE DEVELOPER
             </h4>
             <p className="text-sm text-[#F8F5F0]/80 leading-relaxed font-sans">
-              Join our community and receive inspiring rescue journeys, adoption success stories, and important updates from partner organizations.
+              Designed & Developed by Anurag Bhilare. Life of Paw is a full-stack animal rescue and adoption platform built with React, Tailwind CSS, Spring Boot, and PostgreSQL to streamline rescue, organization, and adoption workflows.
             </p>
-            <form className="flex flex-col space-y-3 font-sans" onSubmit={(e) => e.preventDefault()}>
-              <div className="relative">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full bg-[#F8F5F0]/10 text-white placeholder-white/50 border border-[#D4A017]/30 hover:border-[#D4A017]/60 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] rounded-full py-3 pl-5 pr-12 text-sm transition-all outline-none"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1 top-1 bottom-1 w-10 h-10 rounded-full bg-[#D4A017] text-[#1B4332] flex items-center justify-center hover:bg-[#F8F5F0] hover:text-[#1B4332] transition-colors duration-300"
-                  aria-label="Subscribe"
-                >
-                  <Send size={14} className="fill-current" />
-                </button>
-              </div>
-            </form>
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <a
+                href="https://www.linkedin.com/in/anuragbhilare19"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-[#D4A017] hover:bg-[#F8F5F0] text-[#1B4332] font-semibold text-xs uppercase tracking-wider py-2.5 px-5 rounded-full transition-all duration-300 shadow-sm hover:shadow hover:-translate-y-0.5 transform"
+              >
+                <span>LinkedIn</span>
+                <span className="text-[10px]">↗</span>
+              </a>
+              <a
+                href="https://github.com/anuragbhilare"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-transparent hover:bg-[#F8F5F0]/10 border border-[#F8F5F0]/30 hover:border-[#D4A017] text-[#F8F5F0] hover:text-[#D4A017] font-semibold text-xs uppercase tracking-wider py-2.5 px-5 rounded-full transition-all duration-300 hover:-translate-y-0.5 transform"
+              >
+                <span>GitHub</span>
+                <span className="text-[10px]">↗</span>
+              </a>
+            </div>
           </div>
 
         </div>
