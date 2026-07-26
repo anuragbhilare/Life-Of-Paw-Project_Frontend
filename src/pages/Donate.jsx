@@ -74,6 +74,11 @@ const Donate = () => {
       parsedAmount = 2499;
     }
 
+    if (parsedAmount < 10) {
+      setErrorMessage("Please select a donation tier or enter a custom contribution of at least ₹10.");
+      return;
+    }
+
     try {
       await apiClient.post('/finance/donate', null, {
         params: { amount: parsedAmount }
