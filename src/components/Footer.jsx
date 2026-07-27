@@ -34,7 +34,6 @@ const Footer = () => {
             <p className="text-sm text-[#F8F5F0]/80 font-sans leading-relaxed">
               We operate under the profound belief that compassion is the ultimate form of art. By restoring dignity, rehabilitation, and finding loving homes for neglected paws, we refine the tapestry of society.
             </p>
-            {/* Social Grid */}
             <div className="flex items-center space-x-4">
               {socialLinks.map((social, index) => (
                 <a
@@ -146,19 +145,6 @@ const Footer = () => {
             <Heart size={11} className="fill-[#9B2226] text-[#9B2226] inline" />
             EVERY RESCUE DESERVES A SECOND CHANCE.
           </p>
-
-          {/* <div className="flex items-center space-x-6 font-sans">
-            <a href="#" className="hover:text-[#D4A017] transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-[#D4A017] transition-colors">Terms of Service</a>
-            
-            <button
-              onClick={handleScrollToTop}
-              className="w-8 h-8 rounded-full border border-[#D4A017]/30 flex items-center justify-center hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
-              aria-label="Back to top"
-            >
-              <ArrowUp size={14} />
-            </button>
-          </div> */}
         </div>
       </div>
     </footer>
