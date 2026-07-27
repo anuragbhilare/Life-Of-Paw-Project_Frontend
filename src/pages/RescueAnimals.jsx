@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Star, Sparkles, X, CheckCircle2, ShieldCheck, BriefcaseMedicalIcon} from 'lucide-react';
-import { mockAnimals } from '../mocks/mockData';
 import ScrollAnimate from '../components/ScrollAnimate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient, API_BASE_URL, getImageUrl } from '../services/api';

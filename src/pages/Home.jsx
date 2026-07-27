@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Heart, Star, Sparkles, MessageCircle, Eye, ShieldCheck, CheckCircle2, Info, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { mockStats, mockAnimals, mockNGOs, mockStories } from '../mocks/mockData';
+import { mockStories } from '../mocks/mockData';
 import ScrollAnimate from '../components/ScrollAnimate';
 import Achievements from '../assets/Achievements.jpeg';
 import EmergencyRescue from '../assets/EmergencyRescue.jpeg';
